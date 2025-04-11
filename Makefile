@@ -1,8 +1,8 @@
 
-SOURCES = source_files/
+BOOT_SRC = source_files/boot/
 
 all:
-	nasm -f bin $(SOURCES)boot.asm -o boot.bin
+	nasm -f bin $(BOOT_SRC)boot.asm -o boot.bin
 
 run : all
 	qemu-system-x86_64 boot.bin

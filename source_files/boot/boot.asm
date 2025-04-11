@@ -1,50 +1,54 @@
 ; A memory offset is needed
 [org 0x7c00]
+[bits 16]
 
-mov		[disk_num], dl ; Save the disk number
+global _start:
 
-; Boot message
-mov		bx, boot_msg
-mov		[message_ptr], bx
-call	print_message
+	mov		[disk_num], dl ; Save the disk number
 
-; Wait for input
-mov		ah, 0
-int		0x16
-
-; Reading sector 2 from the disk
-mov		es, [number_zero] ; Extra segment - we won't need it
-mov		ah, 2 ; BIOS read sectors mode
-mov		al, 1 ; N sectors to read
-mov		ch, 0 ; Cylinder num
-mov		dh, 0 ; Head num
-mov		cl, 2 ; Sector num
-mov		dl, [disk_num]
-mov		bx, 0x7e00 ; Location to read memory into
-int		0x13 ; Read disk
-
-; Read error checks
-jc	read_error ; Jump if carry
-cmp	al, 1 ; Num of sectors read - should be 1
-je		read_success
-
-read_error:
-	mov		bx, read_error_msg
-	mov		[message_ptr], bx
-	call	print_message
-	jmp		$
-
-read_success:
-	; Read succesful message
-	mov		bx, read_success_msg
+	; Boot message
+	mov		bx, boot_msg
 	mov		[message_ptr], bx
 	call	print_message
 
-; Wait for input
-mov		ah, 0
-int		0x16
+	; Wait for input
+	mov		ah, 0
+	int		0x16
 
-jmp SECTOR2_START
+	; Reading sector 2 from the disk
+	mov		es, [number_zero] ; Extra segment - we won't need it
+	mov		ah, 2 ; BIOS read sectors mode
+	mov		al, 1 ; N sectors to read
+	mov		ch, 0 ; Cylinder num
+	mov		dh, 0 ; Head num
+	mov		cl, 2 ; Sector num
+	mov		dl, [disk_num]
+	mov		bx, 0x7e00 ; Location to read memory into
+	int		0x13 ; Read disk
+
+	; Read error checks
+	jc	read_error ; Jump if carry
+	cmp	al, 1 ; Num of sectors read - should be 2
+	je		read_success
+
+	read_error:
+		mov		bx, read_error_msg
+		mov		[message_ptr], bx
+		call	print_message
+		jmp		$
+
+	read_success:
+		; Read succesful message
+		mov		bx, read_success_msg
+		mov		[message_ptr], bx
+		call	print_message
+
+	; Wait for input
+	mov		ah, 0
+	int		0x16
+
+	jmp		setup_protected_mode
+
 
 print_message:
 	mov		ah, 0x0e
@@ -91,8 +95,4 @@ number_zero: ; We can't directly move 0 into the es register, use this
 times 510 - ($ - $$) db 0
 db 0x55, 0xaa
 
-
-; SECTOR 2 STARTS HERE --------------------------------------------------------
-SECTOR2_START:
-jmp		$
-; Code from 'enter_protected_mode.asm' will be appended here.
+%include"source_files/boot/enter_protected_mode.asm"
