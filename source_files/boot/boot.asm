@@ -3,7 +3,7 @@
 [bits 16]
 
 ; Location the kernel is loaded into
-KERNEL_LOCATION equ 0x7E00
+KERNEL_LOCATION equ 0x7e00
 KERNEL_SECTOR_SIZE equ 42
 
 section .text

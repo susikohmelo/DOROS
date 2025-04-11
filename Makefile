@@ -26,10 +26,11 @@ all:
 		$(BIN_LOC)kernel.o --oformat binary
 	#
 	# Append kernel binary and the 0 padding to the main binary
-	cat $(BIN_LOC)kernel.bin $(BIN_LOC)zeroes_filler.bin >> $(BIN_LOC)DOROS.bin
+	cat $(BIN_LOC)kernel.bin >> $(BIN_LOC)DOROS.bin
+	cat $(BIN_LOC)zeroes_filler.bin >> $(BIN_LOC)DOROS.bin
 
 run : all
-	qemu-system-x86_64 -drive format=raw,file=$(BIN_LOC)"DOROS.bin",index=0,if=floppy,  -m 128M
+	qemu-system-x86_64 $(BIN_LOC)"DOROS.bin"
 
 clean:
 	rm $(BIN_LOC)*.bin
