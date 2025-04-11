@@ -11,9 +11,9 @@ setup_protected_mode:
 
 %include"source_files/boot/GDT.asm"
 
+; Location of ckernel when loaded
+KERNEL_LOCATION equ 0x7E00
+
 [bits 32]
 enter_protected_mode:
-	mov		al, 'B'
-	mov		ah, 0x0f
-	mov		[0xb8000], ax ; VIDEO MEMORY LOCATION
-	jmp		$
+	jmp	KERNEL_LOCATION

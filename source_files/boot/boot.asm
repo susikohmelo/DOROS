@@ -2,6 +2,11 @@
 [org 0x7c00]
 [bits 16]
 
+; Location the kernel is loaded into
+KERNEL_LOCATION equ 0x7E00
+KERNEL_SECTOR_SIZE equ 42
+
+section .text
 global _start:
 
 	mov	[disk_num], dl ; Save the disk number
@@ -16,19 +21,19 @@ global _start:
 	int	0x16
 
 	; Reading sector 2 from the disk
-	mov	es, [number_zero] ; Extra segment - we won't need it
-	mov	ah, 2 ; BIOS read sectors mode
-	mov	al, 1 ; N sectors to read
-	mov	ch, 0 ; Cylinder num
-	mov	dh, 0 ; Head num
-	mov	cl, 2 ; Sector num
-	mov	dl, [disk_num]
-	mov	bx, 0x7e00 ; Location to read memory into
-	int	0x13 ; Read disk
+	mov	es, [number_zero]	; Extra segment - we won't need it
+	mov	ah, 0x02		; BIOS read sectors mode
+	mov	al, KERNEL_SECTOR_SIZE	; N sectors to read
+	mov	ch, 0x00 		; Cylinder num
+	mov	dh, 0x00		; Head num
+	mov	cl, 0x02		; Sector num
+	mov	dl, [disk_num]		; Disk num
+	mov	bx, KERNEL_LOCATION	; Location to read memory into
+	int	0x13 			; Read disk
 
 	; Read error checks
 	jc	read_error ; Jump if carry
-	cmp	al, 1 ; Num of sectors read - should be 2
+	cmp	al, KERNEL_SECTOR_SIZE ; Num of sectors read
 	je	read_success
 
 	read_error:
@@ -90,9 +95,9 @@ disk_num: ; Variable for storing the disk the boot sector is located in
 number_zero: ; We can't directly move 0 into the es register, use this
 	db 0
 
+%include"source_files/boot/enter_protected_mode.asm"
+
 ; x86 recognizes where to boot by looking for 55 aa between bits 510 to 512
 ; This adds 0s to memory until it reaches the 510th bit, then we define 55/aa
 times 510 - ($ - $$) db 0
 db 0x55, 0xaa
-
-%include"source_files/boot/enter_protected_mode.asm"
