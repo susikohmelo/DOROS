@@ -1,4 +1,4 @@
-# Dorox-kernel
-A simple kernel written entirely from scratch in Assembly and C. x86 - BIOS
+# DOROS
+A simple OS written entirely from scratch in Assembly and C.
 
 Status: Highly WIP - check back a month or two later!
