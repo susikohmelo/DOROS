@@ -17,11 +17,10 @@ global _start:
 	call	print_message
 
 	; Wait for input
-	mov	ah, 0
+	mov	ah, 0x0
 	int	0x16
 
 	; Reading sector 2 from the disk
-	mov	es, [number_zero]	; Extra segment - we won't need it
 	mov	ah, 0x02		; BIOS read sectors mode
 	mov	al, KERNEL_SECTOR_SIZE	; N sectors to read
 	mov	ch, 0x00 		; Cylinder num
@@ -49,8 +48,13 @@ global _start:
 		call	print_message
 
 	; Wait for input
-	mov	ah, 0
+	mov	ah, 0x0
 	int	0x16
+
+	; Enter text mode - this clears the screen for us
+	mov	ah, 0x0
+	mov	al, 0x3
+	int	0x10
 
 	jmp	setup_protected_mode
 
@@ -62,7 +66,7 @@ print_message:
 		mov	al, [bx]
 		int	0x10
 		inc	bx
-		cmp	al, 0
+		cmp	al, 0x0
 		jne	print_loop
 		ret		
 
@@ -90,9 +94,6 @@ read_success_msg:
 	db "Waiting for input ...", 0
 
 disk_num: ; Variable for storing the disk the boot sector is located in
-	db 0
-
-number_zero: ; We can't directly move 0 into the es register, use this
 	db 0
 
 %include"source_files/boot/enter_protected_mode.asm"
