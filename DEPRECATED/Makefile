@@ -1,4 +1,3 @@
-
 BOOT_SRC = source_files/boot/
 KERN_SRC = source_files/kernel/
 BIN_LOC  = binaries/
@@ -31,7 +30,3 @@ all:
 
 run : all
 	qemu-system-x86_64 $(BIN_LOC)"DOROS.bin"
-
-clean:
-	rm $(BIN_LOC)*.bin
-	rm $(BIN_LOC)*.o

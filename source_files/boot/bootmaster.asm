@@ -6,7 +6,7 @@ bits	16
 %define ENDL 0x0D, 0x0A
 
 
-; ============================ FAT 12 HEADER ==================================
+; ============================== FAT 12 HEADER ================================
 jmp 	short start
 nop
 
@@ -28,7 +28,7 @@ fat_drive_num:		db	0	; Drive number
 			db	0	; Reserved byte
 fat_signature:		db	0x28	; Signature
 fat_volume_id:		db	0x42, 0x42, 0x42, 0x42 ; Volume id. Anything goes here.
-fat_volume_label:	db	'Eggman     '	; Volume label, 11 byte str with space char padding
+fat_volume_label:	db	'DOROS      '	; Volume label, 11 byte str with space char padding
 fat_system_id		db	'FAT12   '	; Same thing but FAT12 and 8 bytes
 
 ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
