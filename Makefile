@@ -41,8 +41,11 @@ $(BUILD_DIR)kernel.bin: always
 always:
 	mkdir -p $(BUILD_DIR)
 
-run :
+run:
 	qemu-system-i386 -fda $(BUILD_DIR)floppy_DOROS.img
+
+debug:
+	bochs -f bochs_config
 
 clean:
 	rm -rf $(BUILD_DIR)*
