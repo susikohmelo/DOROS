@@ -2,6 +2,7 @@
 BOOT_SRC = source_files/boot/
 KERN_SRC = source_files/kernel/
 BUILD_DIR  = build/
+BLUEPRINT_DIR = blueprints/
 
 # Assembler
 ASM = nasm
@@ -11,7 +12,9 @@ CC = i386-elf-gcc -ffreestanding -m32 -g
 # Linker used
 LD = i386-elf-ld
 
-.PHONY: all floppy_img kernel bootloader clean always
+.PHONY: all floppy_img kernel bootloader clean always blueprints_fat
+
+all: floppy_img blueprints_fat
 
 # FLOPPY IMAGE ----------------------------------------------------------------
 floppy_img: $(BUILD_DIR)floppy_DOROS.img

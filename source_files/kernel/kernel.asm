@@ -1,12 +1,15 @@
 ; Bootloader is loaded into 0x7C00
-org	0x7C00
+org	0x00
 bits	16
 
 ; /n /r
 %define ENDL 0x0D, 0x0A
 
 start:
-	jmp main
+	mov	si, boot_msg
+	call	prints
+	jmp	$
+
 
 ; Print a string onto the BIOS screen
 ; ds:si points to string
@@ -26,23 +29,4 @@ prints:
 	pop	si
 	ret
 
-main:
-	; Initialize ds/es - depending on the BIOS they may not be set to 0
-	mov	ax, 0
-	mov	ds, ax
-	mov	es, ax
-
-	; Setup stack below our bootloader
-	mov	ss, ax
-	mov	sp, 0x7C00
-
-	mov	si, boot_msg
-	call	prints
-	jmp	$
-
-boot_msg: db 'DOROS bootloader found!', ENDL, 0
-
-; x86 recognizes where to boot by looking for 0x55aa between bits 510 to 512
-; This adds 0s to memory until it reaches the 510th bit, then we define 0x55aa
-times 510 - ($ - $$) db 0
-db 0x55, 0xaa
+boot_msg: db 'You are now in the kernel :D', ENDL, 0
