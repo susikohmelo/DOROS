@@ -6,6 +6,8 @@
 ; Do let me know if there is a smarter way to do it!
 %include "source_files/boot/util_prints.asm"
 
+read_fail_msg: db 'Reading disk failed :<', ENDL, 0
+
 ; Convert LBA to CHS
 ; -	Params
 ;		- ax = LBA
@@ -36,11 +38,6 @@ lba_to_chs:
 	pop	ax
 	ret
 
-
-find_kernel_failed:
-	mov	si, find_kernel_fail_msg
-	call	prints
-	jmp	$
 
 floppy_read_failure:
 	mov	si, read_fail_msg
@@ -107,6 +104,3 @@ read_disk:
 		pop	bx
 		pop	ax
 		ret
-
-
-read_fail_msg: db 'Reading disk failed :<', ENDL, 0
