@@ -34,15 +34,16 @@ start:
 	call	prints
 
 	; Load the kernel into memory
-	mov	si, kernel_filename ; file to find
+	mov	di, KERNEL_SEGMENT	; address to store to
+	mov	si, kernel_filename	; file to find
 	call	load_file
 
-	; Kernel is now in memory - JUMP!
+	; Kernel is now in memory - jump there ( and switch to 32 bit mode )
 	mov	dl, [fat_drive_num]
 	mov	ax, KERNEL_SEGMENT
 	mov	ds, ax ; Align segments to new location
 	mov	es, ax
-	jmp	KERNEL_SEGMENT:KERNEL_SEGMENT
+	jmp	KERNEL_SEGMENT:0
 
 
 ; Yes it's a bit annoying to have to include the path but that's NASM
@@ -50,11 +51,10 @@ start:
 %include "source_files/boot/util_read_disk.asm"
 %include "source_files/boot/util_load_file.asm"
 
-load_msg: db 'Loading DOROS', ENDL, 0
+load_msg: db 'LOADING DOROS', ENDL, 0
 kernel_filename: db 'KERNEL  BIN'
 
 KERNEL_SEGMENT	equ 0x2000
-KERNEL_OFFSET	equ 0x0
 
 ; x86 recognizes where to boot by looking for 0x55aa between bits 510 to 512
 ; This adds 0s to memory until it reaches the 510th bit, then we define 0x55aa

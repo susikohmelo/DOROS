@@ -22,6 +22,7 @@ floppy_img: $(BUILD_DIR)floppy_DOROS.img
 $(BUILD_DIR)floppy_DOROS.img: bootloader kernel
 	dd if=/dev/zero of=$(BUILD_DIR)floppy_DOROS.img bs=512 count=2880
 	mkfs.fat -F 12 -n "DOROS" $(BUILD_DIR)floppy_DOROS.img
+	cat $(BUILD_DIR)enter32.bin $(BUILD_DIR)partial_kernel.bin > $(BUILD_DIR)kernel.bin
 	dd if=$(BUILD_DIR)bootloader.bin of=$(BUILD_DIR)floppy_DOROS.img conv=notrunc
 	mcopy -i $(BUILD_DIR)floppy_DOROS.img $(BUILD_DIR)kernel.bin "::kernel.bin"
 
@@ -31,13 +32,17 @@ bootloader: $(BUILD_DIR)bootloader.bin
 
 $(BUILD_DIR)bootloader.bin: always
 	$(ASM) -f bin $(BOOT_SRC)bootmaster.asm -o $(BUILD_DIR)bootloader.bin
+	$(ASM) -f bin $(BOOT_SRC)enter32.asm -o $(BUILD_DIR)enter32.bin
 
 
 # KERNEL ----------------------------------------------------------------------
 kernel: $(BUILD_DIR)kernel.bin
 
 $(BUILD_DIR)kernel.bin: always
-	$(ASM) -f bin $(KERN_SRC)kernel.asm -o $(BUILD_DIR)kernel.bin
+	$(ASM) -f elf $(KERN_SRC)enter_kernel.asm -o $(BUILD_DIR)enter_kernel.o
+	$(CC) -c $(KERN_SRC)kernel.c -o $(BUILD_DIR)kernel.o
+	$(LD) -o $(BUILD_DIR)partial_kernel.bin -Ttext 0x2000 $(BUILD_DIR)enter_kernel.o \
+		$(BUILD_DIR)kernel.o --oformat binary
 
 
 # MISC ------------------------------------------------------------------------
