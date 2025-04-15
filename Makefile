@@ -8,7 +8,7 @@ BLUEPRINT_DIR = blueprints/
 ASM = nasm
 
 # C cross compiler
-CC = i386-elf-gcc -ffreestanding -m32 -g
+CC = i386-elf-gcc -ffreestanding -m32 -g -O2 -std=gnu99
 # Linker used
 LD = i386-elf-ld
 
@@ -41,8 +41,13 @@ kernel: $(BUILD_DIR)kernel.bin
 $(BUILD_DIR)kernel.bin: always
 	$(ASM) -f elf $(KERN_SRC)enter_kernel.asm -o $(BUILD_DIR)enter_kernel.o
 	$(CC) -c $(KERN_SRC)kernel.c -o $(BUILD_DIR)kernel.o
+	# NOTE! This is highly temporary and just for testing
+	$(CC) -c source_files/kernel/libk/vga_tty/vga_tty_printing.c -o $(BUILD_DIR)lib.o
 	$(LD) -o $(BUILD_DIR)partial_kernel.bin -Ttext 0x2000 $(BUILD_DIR)enter_kernel.o \
-		$(BUILD_DIR)kernel.o --oformat binary
+		$(BUILD_DIR)kernel.o $(BUILD_DIR)lib.o --oformat binary
+
+	# $(LD) -o $(BUILD_DIR)partial_kernel.bin -Ttext 0x2000 $(BUILD_DIR)enter_kernel.o \
+	# 	$(BUILD_DIR)kernel.o --oformat binary
 
 
 # MISC ------------------------------------------------------------------------
