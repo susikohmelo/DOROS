@@ -1,10 +1,10 @@
+#include "libk/include/vga_tty.h"
 
 extern void main()
 {
-	*(char*)0xb8000 = 'T';
-	*(char*)0xb8002 = 'e';
-	*(char*)0xb8004 = 's';
-	*(char*)0xb8006 = 't';
+	terminal_init();
+
+	terminal_putstring("You are now in the .C kernel!");
 
 	while (1)
 	{}
