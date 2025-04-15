@@ -1,5 +1,6 @@
 # DOROS
-A simple x86 32-bit OS written from scratch in Assembly and C. <br>
+A simple x86 32-bit OS written from scratch in Assembly and C.
+
 The main components are the **Kernel**, **Bootloader** and **Shell**.
 
 Status: Highly WIP - expect to see a lot more stuff in a month or two!
