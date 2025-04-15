@@ -56,4 +56,4 @@ GDT_end:
 
 GDT_descriptor:
 	dw	GDT_end - GDT_start - 1 ; Size of the GDT
-	dd	GDT_start+0x2000*16
+	dd	GDT_start+0x20000

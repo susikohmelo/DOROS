@@ -34,11 +34,11 @@ start:
 	call	prints
 
 	; Load the kernel into memory
-	mov	di, KERNEL_SEGMENT; address to store to
-	mov	si, kernel_filename ; file to find
+	mov	di, KERNEL_SEGMENT	; address to store to
+	mov	si, kernel_filename	; file to find
 	call	load_file
 
-	; Kernel is now in memory - switch to 32 bit mode
+	; Kernel is now in memory - jump there ( and switch to 32 bit mode )
 	mov	dl, [fat_drive_num]
 	mov	ax, KERNEL_SEGMENT
 	mov	ds, ax ; Align segments to new location
