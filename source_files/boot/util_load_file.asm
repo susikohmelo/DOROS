@@ -6,7 +6,10 @@ find_file_fail_msg: db 'File not found :<', ENDL, 0
 ; Find and load a file into specified memory address.
 ;	Parameters
 ;		- si = filename (11 bytes exact) 
+;		- di = location in memory to load into
 load_file:
+	push	di ; We will need this way later.
+
 	; Get head_count and sectors_per_track
 	push	es
 	mov	ah, 0x08
@@ -90,9 +93,10 @@ load_file:
 	mov	bx, buffer
 	call	read_disk
 
-	mov	bx, KERNEL_SEGMENT
+	pop	di	; This is the segment we want to load to
+	mov	bx, di
 	mov	es, bx
-	mov	bx, KERNEL_OFFSET
+	mov	bx, 0
 
 .load_file_loop:
 

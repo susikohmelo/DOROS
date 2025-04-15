@@ -1,4 +1,3 @@
-; Bootloader is loaded into 0x7C00
 org	0x00
 bits	16
 
