@@ -29,12 +29,15 @@ enum	e_vga_color
 
 void set_cursor_x(uint8_t x);
 void set_cursor_y(uint8_t y);
+const uint8_t get_color(void);
 const uint8_t get_cursor_x(void);
 const uint8_t get_cursor_y(void);
 
 void terminal_init(void);
 void terminal_clear_screen(void);
+void terminal_scrollup(uint8_t n);
 void terminal_setcolor(uint8_t color);
+uint8_t vga_block_color(uint8_t foreground, uint8_t background);
 
 // Put character and increment cursor
 void terminal_putchar(unsigned char c);
