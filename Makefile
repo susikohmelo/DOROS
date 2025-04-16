@@ -8,7 +8,7 @@ BLUEPRINT_DIR = blueprints/
 ASM = nasm
 
 # C cross compiler
-CC = i386-elf-gcc -ffreestanding -m32 -g -O2 -std=gnu99
+CC = i386-elf-gcc -ffreestanding -m32 -g -O2 -std=gnu99 -Werror
 # Linker used
 LD = i386-elf-ld
 

@@ -48,10 +48,11 @@ after_protected_mode:
 
 
 ; This padding is here so that we know exactly where the real kernel starts
-; (0x20000 + 512)
+; (0x20000 + 512 = 0x20200)
+; Yes - this is kind of stupid - but it can be easily changed later.
 times 512 - ($ - $$) db 0
 
 ; ================================================
-; HERE WILL BE APPENDED AN ASM FILE IN THE MAKEFILE
+; HERE WILL BE APPENDED THE KERNELS MAIN IN THE MAKEFILE
 ; 
 ; The real kernel will begin here

@@ -20,6 +20,10 @@ const uint8_t get_cursor_y(void)
 {
 	return (g_terminal_cursor_y);
 }
+const uint8_t get_color(void)
+{
+	return (g_terminal_color);
+}
 void set_cursor_x(uint8_t x)
 {
 	if (x >= VGA_DEFAULT_WIDTH)
@@ -34,7 +38,7 @@ void set_cursor_y(uint8_t y)
 }
 
 // Combine individual colors for the foreground and backround together
-static inline	uint8_t vga_block_color(uint8_t foreground, uint8_t background)
+uint8_t vga_block_color(uint8_t foreground, uint8_t background)
 {
 	return ( foreground | background << 4 );
 }
@@ -55,6 +59,37 @@ void terminal_putblock_at(unsigned char c, uint8_t color, uint8_t x, uint8_t y)
 	g_terminal_buffer[VGA_DEFAULT_WIDTH * y + x] = vga_block(c, color);
 }
 
+// Scroll screen N rows upwards
+void terminal_scrollup(uint8_t n)
+{
+	// Yes these are 16 bits on purpose.
+	// For some reason the compiler does not increment with uint8 correctly
+	uint16_t *dst;
+	uint16_t src_row;
+	uint16_t dst_row;
+	for (uint8_t y = n; y < VGA_DEFAULT_HEIGHT; ++y)
+	{
+		dst_row = (y - n) * VGA_DEFAULT_WIDTH;
+		src_row = y * VGA_DEFAULT_WIDTH;
+		for (uint8_t x = 0; x < VGA_DEFAULT_WIDTH; ++x)
+		{
+			dst = &(g_terminal_buffer[dst_row + x]);
+			*dst = g_terminal_buffer[src_row + x];
+		}
+	}
+
+	// Clear N rows from the bottom of the screen
+	const uint16_t clear_block = vga_block(' ', g_terminal_color);
+	for (uint8_t y = VGA_DEFAULT_HEIGHT-1; y >= VGA_DEFAULT_HEIGHT - n; --y)
+	{
+		dst_row = y * VGA_DEFAULT_WIDTH;
+		for (uint8_t x = 0; x < VGA_DEFAULT_WIDTH; ++x)
+		{
+			g_terminal_buffer[dst_row + x] = clear_block;
+		}
+	}
+}
+
 // Put character and increment cursor
 void terminal_putchar(unsigned char c)
 {
@@ -64,8 +99,8 @@ void terminal_putchar(unsigned char c)
 	if (++g_terminal_cursor_x >= VGA_DEFAULT_WIDTH)
 	{
 		g_terminal_cursor_x = 0;
-		if (++g_terminal_cursor_y >= VGA_DEFAULT_HEIGHT)
-			g_terminal_cursor_y = 0;
+		if (g_terminal_cursor_y + 1 < VGA_DEFAULT_HEIGHT)
+			++g_terminal_cursor_y;
 	}
 }
 
