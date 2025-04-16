@@ -1,10 +1,11 @@
 #include "libk/include/vga_tty.h"
 
-extern void main()
+void main()
 {
 	terminal_init();
 
-	terminal_putstring("You are now in the .C kernel!");
+	//char str[] = "You are now in the .C kernel!";
+	terminal_putstring("Hi");
 
 	while (1)
 	{}

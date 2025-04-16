@@ -39,15 +39,12 @@ $(BUILD_DIR)bootloader.bin: always
 kernel: $(BUILD_DIR)kernel.bin
 
 $(BUILD_DIR)kernel.bin: always
-	$(ASM) -f elf $(KERN_SRC)enter_kernel.asm -o $(BUILD_DIR)enter_kernel.o
 	$(CC) -c $(KERN_SRC)kernel.c -o $(BUILD_DIR)kernel.o
 	# NOTE! This is highly temporary and just for testing
 	$(CC) -c source_files/kernel/libk/vga_tty/vga_tty_printing.c -o $(BUILD_DIR)lib.o
-	$(LD) -o $(BUILD_DIR)partial_kernel.bin -Ttext 0x2000 $(BUILD_DIR)enter_kernel.o \
+	# Yes 0x20200 is hardcoded. It is the location of the kernel
+	$(LD) -o $(BUILD_DIR)partial_kernel.bin -Ttext 0x20200 \
 		$(BUILD_DIR)kernel.o $(BUILD_DIR)lib.o --oformat binary
-
-	# $(LD) -o $(BUILD_DIR)partial_kernel.bin -Ttext 0x2000 $(BUILD_DIR)enter_kernel.o \
-	# 	$(BUILD_DIR)kernel.o --oformat binary
 
 
 # MISC ------------------------------------------------------------------------

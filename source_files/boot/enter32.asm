@@ -46,6 +46,11 @@ after_protected_mode:
 	mov	ebp, 0x90000 ; TODO arbitrary number, look more into later
 	mov	esp, ebp
 
+
+; This padding is here so that we know exactly where the real kernel starts
+; (0x20000 + 512)
+times 512 - ($ - $$) db 0
+
 ; ================================================
 ; HERE WILL BE APPENDED AN ASM FILE IN THE MAKEFILE
 ; 
