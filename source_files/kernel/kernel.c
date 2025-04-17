@@ -1,3 +1,12 @@
+/*
+ *
+ * This is the main kernel file.
+ * It contains the primary abstract logic.
+ *
+ * External functions are heavily used. Mostly functions from libk.
+ *
+*/
+
 #include "libk/include/vga_tty.h"
 
 
