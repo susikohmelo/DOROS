@@ -41,7 +41,7 @@ kernel: $(BUILD_DIR)kernel.bin
 $(BUILD_DIR)kernel.bin: always
 	$(CC) -c $(KERN_SRC)kernel.c -o $(BUILD_DIR)kernel.o
 	# NOTE! This is highly temporary and just for testing
-	$(CC) -c source_files/kernel/libk/vga_tty/vga_tty_printing.c -o $(BUILD_DIR)lib.o
+	$(CC) -c source_files/libk/vga_tty/vga_tty_printing.c -o $(BUILD_DIR)lib.o
 	# Yes 0x20200 is hardcoded. It is the location of the kernel
 	$(LD) -o $(BUILD_DIR)partial_kernel.bin -Ttext 0x20200 \
 		$(BUILD_DIR)kernel.o $(BUILD_DIR)lib.o --oformat binary

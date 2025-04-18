@@ -7,7 +7,7 @@
  *
 */
 
-#include "libk/include/vga_tty.h"
+#include "../libk/include/vga_tty.h"
 
 
 // Each row is 80 wide even if it doesn't look like it
