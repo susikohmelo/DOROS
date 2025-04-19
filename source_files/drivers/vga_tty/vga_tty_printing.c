@@ -93,6 +93,17 @@ void terminal_scrollup(uint8_t n)
 // Put character and increment cursor
 void terminal_putchar(unsigned char c)
 {
+	if (c == '\n')
+	{
+		g_terminal_cursor_x = 0;
+		
+		if (g_terminal_cursor_y + 1 < VGA_DEFAULT_HEIGHT)
+			++g_terminal_cursor_y;
+		else
+			terminal_scrollup(1);
+		return ;
+	}
+
 	terminal_putblock_at(c, g_terminal_color,
 			g_terminal_cursor_x, g_terminal_cursor_y);
 	// Increment cursor and wrap around if it goes over the bounds
@@ -101,6 +112,8 @@ void terminal_putchar(unsigned char c)
 		g_terminal_cursor_x = 0;
 		if (g_terminal_cursor_y + 1 < VGA_DEFAULT_HEIGHT)
 			++g_terminal_cursor_y;
+		else
+			terminal_scrollup(1);
 	}
 }
 

@@ -20,11 +20,13 @@
 // Don't bother making a header just for this
 void print_bootup_message();
 
-// Very simple function to just test we're getting input. No they printed
-// values are not mapped correctly to the keys we just wanna see something.
+// Very simple function to just test we're getting input.
 void test_keyinput(uint8_t keycode)
 {
-	terminal_putchar(keycode + '0');
+	int8_t	translated_key = keycode_map[keycode];
+	if (translated_key < 0) // special key
+		return ;
+	terminal_putchar(translated_key);
 }
 
 void main()
