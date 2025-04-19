@@ -23,12 +23,19 @@
 #define	KEYBOARD_DATA_PORT	0x60
 #define	KEYBOARD_STATUS_PORT	0x64
 
+extern void	keyboard_handler();
+extern uint8_t	ioport_in(uint16_t port);
+extern void	ioport_out(uint16_t port, uint8_t data);
+extern void	load_ldt(uint16_t *idt_address);
+extern void	enable_interrupts();
+extern void	disable_interrupts();
+
 // Pointer to the IDT. Similar to how there is a ptr to the GDT
 struct	IDT_ptr
 {
 	uint16_t	limit;
 	uint32_t	base;
-} __attribute__((packed));
+} __attribute__((packed))
 // packed attribute removes any padding the compiler might add
 
 // One entry in the IDT. Again very similar to the GDT entries.
@@ -39,17 +46,10 @@ struct	IDT_entry
 	uint8_t		zero;
 	uint8_t		type_attribute;
 	uint16_t	offset_upperbits;
-} __attribute__((packed));
+} __attribute__((packed))
 
 struct IDT_entry g_IDT[IDT_SIZE]; // The IDT itself.
 
-extern void	keyboard_handler();
-extern int8_t	ioport_in(uint16_t port);
-extern void	ioport_out(uint16_t port, uint8_t data);
-extern void	load_IDT(struct IDT_ptr *idt_address);
-extern void	enable_interrupts();
-extern void	disable_interrupts();
-				  
 void init_IDT()
 {
 	// This is the memory address of the function
@@ -60,7 +60,7 @@ void init_IDT()
 	g_IDT[33].selector = KERNEL_SEGMENT_OFFSET;
 	g_IDT[33].zero = 0;
 	g_IDT[33].type_attribute = IDT_INTERRUPT_GATE;
-	g_IDT[33].offset_upperbits = (offset & 0xFFFF0000) >> 16; // Higher half
+	g_IDT[33].offset_upperbits = offset & 0xFFFF0000 >> 16; // Higher half
 
 	// ICW1 ( init/reset PIC )
 	ioport_out(PIC1_CMD_PORT, 0x11);
@@ -86,9 +86,9 @@ void init_IDT()
 
 	struct IDT_ptr idt_ptr;
 	// Size is always - 1 with GDT and IDT. Don't remember why, but is.
-	idt_ptr.limit = (sizeof(struct IDT_entry)) * IDT_SIZE - 1;
-	idt_ptr.base = (uint32_t) &g_IDT;
-	load_IDT(&idt_ptr);
+	idt_ptr.limit = sizeof(struct IDT_entry) * IDT_SIZE - 1;
+	idt_ptr.base = (uint32_t) &IDT;
+	load_idt(&idt_ptr);
 }
 
 void init_keyboard()
@@ -124,84 +124,4 @@ void handle_keyboard_interrupt()
 		terminal_putchar(keycode + '0');
 		
 	}
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*
- *
- * This is the main kernel file.
- * It contains the primary abstract logic.
- *
- * External functions are heavily used. Mostly functions from libk.
- *
-*/
-
-//#include "../libk/include/vga_tty.h"
-
-
-// Each row is 80 wide even if it doesn't look like it
-void print_bootup_message()
-{
-	// Store original color so we can change back to it before returning
-	uint8_t original_color = get_color();
-
-	// Color of the first half
-	uint8_t color = vga_block_color(VGA_COLOR_WHITE, VGA_COLOR_RED);
-	terminal_setcolor(color);
-
-	unsigned char *h1 = "\
-00000000000000000000000000000000000000000000000000000000000000000000000000000000\
-1                                                                              1\
-2      oooooooooo.     .oooooo.   ooooooooo.     .oooooo.    .oooooo..o        2\
-3      `888'   `Y8b   d8P'  `Y8b  `888   `Y88.  d8P'  `Y8b  d8P'    `Y8        3\
-4       888      888 888      888  888   .d88' 888      888 Y88bo.             4\
-5       888      888 888      888  888ooo88P'  888      888  `\"Y8888o.         5\
-6       888      888 888      888  888`88b.    888      888      `\"Y88b        6";
-
-	// Print first half
-	terminal_putstring(h1);
-	// Change color for second half
-	color = vga_block_color(VGA_COLOR_LIGHT_GRAY, VGA_COLOR_RED);
-	terminal_setcolor(color);
-
-	unsigned char *h2 = "\
-7       888     d88' `88b    d88'  888  `88b.  `88b    d88' oo     .d8P        7\
-8      o888bood8P'    `Y8bood8P'  o888o  o888o  `Y8bood8P'  8\"\"88888P'         8\
-9                                                                              9\
-10101010101010101010101010101010101010101010101010101010101010101010101010101010";
-	terminal_putstring(h2);
-
-	// Subtitle color
-	color = vga_block_color(VGA_COLOR_BLACK, VGA_COLOR_WHITE);
-	terminal_setcolor(color);
-
-	unsigned char *subtitle= "\
-                           - Welcome to DOROS v 0.1 -                           ";
-	terminal_putstring(subtitle);
-
-	// Switch color back to the original color
-	terminal_setcolor(original_color);
-}
-
-void main()
-{
-	terminal_init();
-	print_bootup_message();
-	init_IDT();
-	init_keyboard();
-	enable_interrupts(); // Re-enable interrupts
-
-	while (1)
-	{}
 }

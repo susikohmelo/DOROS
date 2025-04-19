@@ -27,21 +27,25 @@ enum	e_vga_color
 	VGA_COLOR_WHITE		=	15,
 };
 
+// Cursor is the position where the characters are put on screen
 void set_cursor_x(uint8_t x);
 void set_cursor_y(uint8_t y);
 const uint8_t get_color(void);
 const uint8_t get_cursor_x(void);
 const uint8_t get_cursor_y(void);
 
+// Clear screen and set variables up. Not using this is undefined behaviour
 void terminal_init(void);
 void terminal_clear_screen(void);
 void terminal_scrollup(uint8_t n);
 void terminal_setcolor(uint8_t color);
+
+// Combine two colors into a VGA character with a fore and background color.
 uint8_t vga_block_color(uint8_t foreground, uint8_t background);
 
-// Put character and increment cursor
+// Both of these increment the cursor position
 void terminal_putchar(unsigned char c);
-// Put string and increment cursor
 void terminal_putstring(const unsigned char *c);
+
 // Put a block (character + color) at position but does not affect cursor
 void terminal_putblock_at(unsigned char c, uint8_t color, uint8_t x, uint8_t y);

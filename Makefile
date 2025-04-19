@@ -8,7 +8,7 @@ BLUEPRINT_DIR = blueprints/
 ASM = nasm
 
 # C cross compiler
-CC = i386-elf-gcc -ffreestanding -m32 -g -O2 -std=gnu99 -Werror
+CC = i386-elf-gcc -ffreestanding -m32 -g -O2 -std=gnu99  -ggdb
 # Linker used
 LD = i386-elf-ld
 
@@ -39,12 +39,14 @@ $(BUILD_DIR)bootloader.bin: always
 kernel: $(BUILD_DIR)kernel.bin
 
 $(BUILD_DIR)kernel.bin: always
-	$(CC) -c $(KERN_SRC)kernel.c -o $(BUILD_DIR)kernel.o
+	$(CC) -c $(KERN_SRC)kernel.c -o $(BUILD_DIR)kernel_c.o
+	$(ASM) -f elf $(KERN_SRC)kernel.asm -o $(BUILD_DIR)kernel_asm.o
 	# NOTE! This is highly temporary and just for testing
 	$(CC) -c source_files/libk/vga_tty/vga_tty_printing.c -o $(BUILD_DIR)lib.o
 	# Yes 0x20200 is hardcoded. It is the location of the kernel
 	$(LD) -o $(BUILD_DIR)partial_kernel.bin -Ttext 0x20200 \
-		$(BUILD_DIR)kernel.o $(BUILD_DIR)lib.o --oformat binary
+		$(BUILD_DIR)kernel_asm.o $(BUILD_DIR)kernel_c.o \
+		$(BUILD_DIR)lib.o --oformat binary
 
 
 # MISC ------------------------------------------------------------------------
