@@ -8,7 +8,7 @@ BLUEPRINT_DIR = blueprints/
 ASM = nasm
 
 # C cross compiler
-CC = i386-elf-gcc -ffreestanding -m32 -g -O2 -std=gnu99 -Werror
+CC = i386-elf-gcc -ffreestanding -m32 -g -O2 -std=gnu99  -ggdb
 # Linker used
 LD = i386-elf-ld
 
@@ -39,12 +39,21 @@ $(BUILD_DIR)bootloader.bin: always
 kernel: $(BUILD_DIR)kernel.bin
 
 $(BUILD_DIR)kernel.bin: always
-	$(CC) -c $(KERN_SRC)kernel.c -o $(BUILD_DIR)kernel.o
+	$(CC) -c $(KERN_SRC)kernel.c -o $(BUILD_DIR)kernel_c.o
+	$(CC) -c $(KERN_SRC)boot_message.c -o $(BUILD_DIR)boot_message.o
 	# NOTE! This is highly temporary and just for testing
-	$(CC) -c source_files/libk/vga_tty/vga_tty_printing.c -o $(BUILD_DIR)lib.o
+	# This needs it's own makefile later
+	$(CC) -c source_files/drivers/vga_tty/vga_tty_printing.c -o $(BUILD_DIR)tty.o
+	$(CC) -c source_files/drivers/keyboard/keyboard.c -o $(BUILD_DIR)keyboard.o
+	$(CC) -c source_files/kernel/interrupts/IDT.c -o $(BUILD_DIR)IDT.o
+	$(ASM) -f elf source_files/kernel/interrupts/interrupt_utils.asm -o $(BUILD_DIR)interrupt_utils.o
+	$(ASM) -f elf source_files/drivers/keyboard/receive_keyboard_interrupts.asm -o $(BUILD_DIR)receive_keyboard_interrupts.o
 	# Yes 0x20200 is hardcoded. It is the location of the kernel
 	$(LD) -o $(BUILD_DIR)partial_kernel.bin -Ttext 0x20200 \
-		$(BUILD_DIR)kernel.o $(BUILD_DIR)lib.o --oformat binary
+		$(BUILD_DIR)kernel_c.o $(BUILD_DIR)boot_message.o\
+		$(BUILD_DIR)keyboard.o $(BUILD_DIR)receive_keyboard_interrupts.o \
+		$(BUILD_DIR)interrupt_utils.o $(BUILD_DIR)IDT.o \
+		$(BUILD_DIR)tty.o --oformat binary
 
 
 # MISC ------------------------------------------------------------------------
