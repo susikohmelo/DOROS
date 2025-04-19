@@ -1,22 +1,14 @@
 ;
-; The main kernel logic is in kernel.c. 
-; This is part of the kernel, but not the main file for the kernel.
+; This file handles the assembly part of the most basic interrupt functions.
 ;
-; This file is used by kernel.c to run functions that were easier to write in
-; assembly than C.
-;
-; Inline assembly in C is a thing but it can be really wonky and this to me
-; much more clear cut and easy to follow.
+; Inline assembly in C is a thing but it can be kind of wonky.
+; A fully separate file should be more clear cut and easy to follow.
 ;
 
-
-extern	handle_keyboard_interrupt
-
-global	load_IDT
 global	enable_interrupts
 global	disable_interrupts
 
-global	keyboard_handler
+global	load_IDT
 global	ioport_in
 global	ioport_out
 
@@ -35,16 +27,6 @@ load_IDT:
 	mov	edx, [esp + 4]
 	lidt	[edx]
 	ret
-
-; This is the address that keyboard interrupts will cause to load
-keyboard_handler:
-	pushad	; store all registers
-	cld	; clear direction. This is usually not necessary but why not.
-	call	handle_keyboard_interrupt
-	popad
-	iretd	; Return from interrupt
-
-
 
 ; 1 parameter, the port to read from (16 bits)
 ;
