@@ -1,8 +1,16 @@
 #include "../../kernel/interrupts/IDT.h"
-#include "../include/vga_tty.h"
+#include "../include/keyboard.h"
 
 // ASM function that gets called before the real handler
 extern void	recieve_keyboard_interrupt();
+
+uint8_t	g_keybuffer_size = 0; // Amount of items in the buffer
+void (*g_keyboard_function)(uint8_t) = 0;
+
+void set_keyboard_function(void (*f)(uint8_t))
+{
+	g_keyboard_function = f;
+}
 
 void init_keyboard()
 {
@@ -41,14 +49,8 @@ void handle_keyboard_interrupt()
 	if (status & 0x1) // If a new key has been pressed
 	{
 		uint8_t keycode = ioport_in(KEYBOARD_DATA_PORT);
-		if (keycode < 0 || keycode >= 128) // Outside our mapped keys
+		if (g_keyboard_function == 0 || keycode < 0 || keycode >= 128)
 			return ;
-		// TODO this is just for testing.
-		// This needs to probably be thrown in to some sort of buffer.
-		// Maybe a specific memory location where a buffer of inputs is
-		// stored and a getter function for running processes to be
-		// able to poll the inputs?
-		terminal_putchar(keycode + '0');
-		
+		g_keyboard_function(keycode);
 	}
 }

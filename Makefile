@@ -40,6 +40,7 @@ kernel: $(BUILD_DIR)kernel.bin
 
 $(BUILD_DIR)kernel.bin: always
 	$(CC) -c $(KERN_SRC)kernel.c -o $(BUILD_DIR)kernel_c.o
+	$(CC) -c $(KERN_SRC)boot_message.c -o $(BUILD_DIR)boot_message.o
 	# NOTE! This is highly temporary and just for testing
 	# This needs it's own makefile later
 	$(CC) -c source_files/drivers/vga_tty/vga_tty_printing.c -o $(BUILD_DIR)tty.o
@@ -49,7 +50,7 @@ $(BUILD_DIR)kernel.bin: always
 	$(ASM) -f elf source_files/drivers/keyboard/receive_keyboard_interrupts.asm -o $(BUILD_DIR)receive_keyboard_interrupts.o
 	# Yes 0x20200 is hardcoded. It is the location of the kernel
 	$(LD) -o $(BUILD_DIR)partial_kernel.bin -Ttext 0x20200 \
-		$(BUILD_DIR)kernel_c.o \
+		$(BUILD_DIR)kernel_c.o $(BUILD_DIR)boot_message.o\
 		$(BUILD_DIR)keyboard.o $(BUILD_DIR)receive_keyboard_interrupts.o \
 		$(BUILD_DIR)interrupt_utils.o $(BUILD_DIR)IDT.o \
 		$(BUILD_DIR)tty.o --oformat binary
