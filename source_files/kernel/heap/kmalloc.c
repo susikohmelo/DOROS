@@ -2,8 +2,6 @@
 
 uint8_t *g_heap_bitmap = (uint8_t*) HEAP_BITMAP_POS;
 
-// REFER TO heap.h FOR MORE DETAILED DOCUMENTATION OF KMALLOC AND KFREE
-
 // Return first free bitmap page that contains enough space to fit the value
 // TODO needs optimizing.
 static inline uint32_t find_free_memory(uint32_t n, uint8_t *error)
@@ -65,7 +63,6 @@ static inline void write_bitmap_header(uint32_t pos, uint32_t size)
 {
 	*((uint32_t*) (HEAP_POS + pos * HEAP_BITMAP_PAGE_SIZE)) = size;
 }
-
 
 void *kmalloc(uint32_t n_bytes)
 {
