@@ -14,6 +14,7 @@
 #include "../drivers/include/keyboard.h"
 #include "interrupts/interrupt_utils.h"
 #include "interrupts/IDT.h"
+#include "heap/heap.h"
 #include <stdint.h>
 
 
@@ -39,6 +40,11 @@ void main()
 
 	print_bootup_message();
 	enable_interrupts(); // Re-enable interrupts
+
+	// Testing kmalloc/free
+	uint8_t *ptr = kmalloc(1);
+	*ptr = 2;
+	kfree(ptr);
 
 	while (1) // Not optimal, just for testing
 	{}
