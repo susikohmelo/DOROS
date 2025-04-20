@@ -1,18 +1,15 @@
 # DOROS
-### A simple x86 32-bit OS written from 100% scratch in Assembly and C.
-Not even GRUB is used - talk about bare metal.
+A simple x86 32-bit OS written from 100% scratch in Assembly and C.
+>[!WARNING]
+This project is WIP - expect to see more later, that being said there's already plenty to look at!
 
 <sub> DOROS booting on real hardware </sub><br>
 <img src="https://github.com/susikohmelo/DOROS/blob/main/readme_files/doros_boot.gif" height="400" />
 
-
 >[!TIP]
-**The repository is well documented**<br><br>
-Most of the source_file folders have a README with a summary of the folder's contents<br>
-Feel free to look around!
+**The repository is well documented** - feel free to look around!<br><br>
+Most of the source_file subfolders have READMEs with a summary of the folder's contents.<br>
 
->[!WARNING]
-This project is highly WIP - expect to see a lot more stuff in a month or two!
 
 ## What's currently implemented?
 ### In 16-bit real mode
