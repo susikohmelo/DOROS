@@ -7,16 +7,18 @@ A simple x86 32-bit OS written from scratch in Assembly and C.
 
 Status: Highly WIP - expect to see a lot more stuff in a month or two!
 
-## What is currently implemented?
+## What's currently implemented?
+### In 16-bit real mode
 - Bootloader with an assembly based driver to find and load any file from a FAT12 file system
-- Global Descriptor Table (GDT) following a small flat memory model
-- Entry to 32-bit protected mode and the C based kernel
+- Global Descriptor Table following a small flat memory model
+### In 32-bit protected mode
+- Interrupt Descriptor Table
 - Basic TTY functionality (printing characters to video memory with colors)
-- Interrupt Descriptor Table (IDT)
 - Interrupt based PS/2 keyboard driver
+- **Currently working on: Heap allocation (malloc/free like functionality)**
 
 ## How to run?
-Compiling the program is a bit harder when it comes to OS, since the system you're compiling it on likely has a different arcitechture from the target.
+Compiling the program is a bit harder when it comes to OS's, since the system you're compiling it on likely has a different arcitechture from the target.
 
 Currently the repository doesn't contain a script or docker image that would allow you to install the tools required to compile the code.
 
