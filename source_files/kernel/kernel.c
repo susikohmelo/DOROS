@@ -42,7 +42,8 @@ void main()
 	enable_interrupts(); // Re-enable interrupts
 
 	// Testing kmalloc
-	kmalloc(1);
+	uint8_t *ptr = kmalloc(1);
+	*ptr = 1;
 
 	while (1) // Not optimal, just for testing
 	{}
