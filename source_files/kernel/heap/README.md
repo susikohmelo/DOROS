@@ -15,21 +15,20 @@ Again very easy to implement later if need be.
 
 
 ## Kmalloc
-Usage is more or less the same as malloc().
+Usage is essentially identical to malloc().
 
-Kmalloc's allocated size will actually be *num_of_bytes* + *HEADER_SIZE*.
+Kmalloc's allocated size will actually be `num_of_bytes + HEADER_SIZE` rounded up to the minimum size of an allocation (currently 8 bytes).
 
-The first *HEADER_SIZE* bytes are used to store the length of the memory
-IN BITMAP_PAGES so that kfree can read it and know how much to free.
+The first `HEADER_SIZE` bytes are used to store the length of the memory in `BITMAP_PAGES` so that kfree can read it and know how much to free.
 
 
 ## Kfree
-Usage is more or less the same as free().<br>
+Usage mostly the same as free().<br>
 Main exception is that a double free does not give an error and simply does nothing.
 
 As mentioned before, kfree() gets number for the amount of data to free from a
 header that is placed right before the pointer itself. So it will simply index
-ptr - HEADER_SIZE to get it.
+`ptr - HEADER_SIZE` to get it.
 
 The memory is not set to 0 as this would be a waste of time. It just flags the memory as free to use.
 
