@@ -1,4 +1,4 @@
-# File structure
+# Structure
 ```
 - Include/ -
 Contains headers that the kernel can include and allow the full use of the drivers
