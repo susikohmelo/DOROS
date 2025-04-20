@@ -13,4 +13,17 @@ Status: Highly WIP - expect to see a lot more stuff in a month or two!
 - Entry to 32-bit protected mode and the C based kernel
 - Basic TTY functionality (printing characters to video memory with colors)
 - Interrupt Descriptor Table (IDT)
-- Interrupt based keyboard driver (though it is printing the raw keycodes currently and still needs mapping)
+- Interrupt based PS/2 keyboard driver
+
+## How to run?
+Compiling the program is a bit harder when it comes to OS, since the system you're compiling it on likely has a different arcitechture from the target.
+
+Currently the repository doesn't contain a script or docker image that would allow you to install the tools required to compile the code.
+
+You would have to install the gcc i386 cross compiler yourself.
+This will be added in the near future, or at the very least a precompiled binary.
+
+The output of the makefile is a file called floppy_DOROS.img.
+
+It is a FAT12 floppy disk image. You can simply run it in QEMU as is, or if you want to try it on real hardware,
+rename the extension to .iso and burn it onto a USB stick to boot off of. Yes floppy images convert directly to ISO images.
