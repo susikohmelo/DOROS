@@ -61,10 +61,9 @@ static inline void turn_on_bitmap_bits(uint32_t pos, uint32_t n)
 	}
 }
 
-static inline void write_bitmap_header(uint32_t *pos, uint32_t size)
+static inline void write_bitmap_header(uint32_t pos, uint32_t size)
 {
-	*((uint32_t*) HEAP_POS + (*pos) * HEAP_BITMAP_PAGE_SIZE) = size;
-	*pos + HEAP_PTR_HEADER_SIZE * HEAP_BITMAP_PAGE_SIZE;
+	*((uint32_t*) (HEAP_POS + pos * HEAP_BITMAP_PAGE_SIZE)) = size;
 }
 
 
@@ -86,8 +85,9 @@ void *kmalloc(uint32_t n_bytes)
 	turn_on_bitmap_bits(bit_pos, page_count);
 
 	// Bitpos will be incremented in the function
-	write_bitmap_header(&bit_pos, page_count);
+	write_bitmap_header(bit_pos, page_count);
 
 	// Return the real address
-	return (void*) HEAP_POS + bit_pos * HEAP_BITMAP_PAGE_SIZE;
+	return ((void*) HEAP_POS + bit_pos * HEAP_BITMAP_PAGE_SIZE
+			+ HEAP_PTR_HEADER_SIZE);
 }

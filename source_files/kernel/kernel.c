@@ -43,7 +43,7 @@ void main()
 
 	// Testing kmalloc
 	uint8_t *ptr = kmalloc(1);
-	*ptr = 1;
+	*ptr = 2;
 
 	while (1) // Not optimal, just for testing
 	{}
