@@ -15,7 +15,8 @@ Status: Highly WIP - expect to see a lot more stuff in a month or two!
 - Interrupt Descriptor Table
 - Basic TTY functionality (printing characters to video memory with colors)
 - Interrupt based PS/2 keyboard driver
-- **Currently working on: Heap allocation (malloc/free like functionality)**
+- Heap allocation (malloc/free like functionality)
+- **Currently working on: an extremely basic shell**
 
 ## How to run?
 Compiling the program is a bit harder when it comes to OS's, since the system you're compiling it on likely has a different arcitechture from the target.
