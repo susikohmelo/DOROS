@@ -41,6 +41,7 @@ kernel: $(BUILD_DIR)kernel.bin
 $(BUILD_DIR)kernel.bin: always
 	$(CC) -c $(KERN_SRC)kernel.c -o $(BUILD_DIR)kernel_c.o
 	$(CC) -c $(KERN_SRC)heap/kmalloc.c -o $(BUILD_DIR)kmalloc.o
+	$(CC) -c $(KERN_SRC)heap/kfree.c -o $(BUILD_DIR)kfree.o
 	$(CC) -c $(KERN_SRC)boot_message.c -o $(BUILD_DIR)boot_message.o
 	# NOTE! This is highly temporary and just for testing
 	# This needs it's own makefile later
@@ -54,7 +55,7 @@ $(BUILD_DIR)kernel.bin: always
 		$(BUILD_DIR)kernel_c.o $(BUILD_DIR)boot_message.o\
 		$(BUILD_DIR)keyboard.o $(BUILD_DIR)receive_keyboard_interrupts.o \
 		$(BUILD_DIR)interrupt_utils.o $(BUILD_DIR)IDT.o \
-		$(BUILD_DIR)kmalloc.o \
+		$(BUILD_DIR)kmalloc.o $(BUILD_DIR)kfree.o \
 		$(BUILD_DIR)tty.o --oformat binary
 
 

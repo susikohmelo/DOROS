@@ -38,5 +38,9 @@
 #define HEAP_POS	0x90010 + HEAP_BITMAP_LEN // Grows upward
 #define	HEAP_BITMAP_POS	0x90010
 
+
+// This is literally just used as a pointer to the bitmap.
+extern uint8_t *g_heap_bitmap;
+
 void *kmalloc(uint32_t n_bytes);
 void kfree(uint8_t *ptr);
