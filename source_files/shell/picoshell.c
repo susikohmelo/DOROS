@@ -12,7 +12,7 @@
 int8_t	g_keybuffer[SHELL_BUF_SIZE + 1]; // + 1 so it's always null terminated
 uint8_t	g_keybuffer_len = 0;
 
-// TODO move these into libk later
+// TODO move this into a libk later
 static int8_t k_memcmp(void *s1, void *s2, uint8_t n)
 {
 	while ( *((int8_t*)s1) == *((int8_t*)s2) && n-- > 0 )
@@ -21,14 +21,6 @@ static int8_t k_memcmp(void *s1, void *s2, uint8_t n)
 		++s2;
 	}
 	return (*((int8_t*)s1) - *((int8_t*)s2));
-}
-static uint8_t k_strlen(uint8_t *str)
-{
-	uint8_t	len = 0;
-
-	while (str[len] != 0)
-		++len;
-	return len;
 }
 
 static void flush_buffer()
@@ -48,15 +40,7 @@ static void write_prompt()
 	terminal_putstring(" > ");
 }
 
-static void cmd_ls(uint8_t *args)
-{
-	terminal_putstring("32-bit mode file system is not implemented yet\n");
-}
-
-static void cmd_clear(uint8_t *args)
-{
-	terminal_clear_screen();
-}
+#include "commands.c" // cmd_help etc.
 
 static inline void invalid_command()
 {
@@ -68,6 +52,8 @@ static inline void invalid_command()
 static inline void (*get_function_ptr(uint8_t *cmd))(uint8_t*)
 {
 	// Yes, hashmaps would be neat but unnecessary as we have few commands
+	if (k_memcmp(cmd, "help", 4) == 0)
+		return &cmd_help;
 	if (k_memcmp(cmd, "ls", 2) == 0)
 		return &cmd_ls;
 	if (k_memcmp(cmd, "clear", 5) == 0)
@@ -162,9 +148,20 @@ void key_catcher(uint8_t keycode) // Async function called on keyboard interrupt
 	}
 }
 
+static void launch_message()
+{
+	uint8_t	og_color = get_color(); // Terminal color
+	terminal_setcolor(vga_block_color(VGA_COLOR_WHITE,
+					VGA_COLOR_RED));
+	terminal_putstring("\
+You are now in PICOSHELL - Type 'help' for a list of commands.                  ");
+	terminal_setcolor(og_color);
+}
+
 void launch_picoshell()
 {
 	flush_buffer();
+	launch_message();
 	set_keyboard_function(&key_catcher); // Redirect keyboard input here
 	write_prompt();
 

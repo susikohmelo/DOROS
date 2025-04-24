@@ -15,6 +15,7 @@
 #include "interrupts/interrupt_utils.h"
 #include "interrupts/IDT.h"
 #include "heap/heap.h"
+#include <stdbool.h>
 #include <stdint.h>
 
 
@@ -22,14 +23,10 @@
 void print_bootup_message();
 void launch_picoshell();
 
-// Very simple function to just test we're getting input.
-void test_keyinput(uint8_t keycode)
-{
-	int8_t	translated_key = keycode_map[keycode];
-	if (translated_key < 0) // special key
-		return ;
-	terminal_putchar(translated_key);
-}
+// This function is used just so that the keyboard interrupt has some sort of
+// memory address to jump to.
+void keyboard_init_function(uint8_t keycode) {}
+
 
 void main()
 {
@@ -40,8 +37,13 @@ void main()
 
 	print_bootup_message();
 	enable_interrupts(); // Re-enable interrupts
+
+	set_keyboard_function(&keyboard_init_function); // Wait for input
+	asm("HLT");
+
+	terminal_clear_screen();
 	launch_picoshell();
 
-	while (1) // Not optimal, just for testing
+	while (1) // Not optimal, just for quick testing.
 	{}
 }
