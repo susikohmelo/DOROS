@@ -28,10 +28,9 @@ Compiling the program is a bit harder when it comes to OS's, since the system yo
 
 Currently the repository doesn't contain a script or docker image that would allow you to install the tools required to compile the code.
 
-You would have to install the gcc i386 cross compiler yourself.
-This will be added in the near future, or at the very least a precompiled binary.
+You would have to install the gcc i386 cross compiler yourself. A script for this will be added in the near future.
 
-The output of the makefile is a file called floppy_DOROS.img.
+**However, there is a precompiled disk image included in the repository!**
 
-It is a FAT12 floppy disk image. You can simply run it in QEMU as is, or if you want to try it on real hardware,
-rename the extension to .iso and burn it onto a USB stick to boot off of. Yes floppy images convert directly to ISO images.
+It is a FAT12 floppy disk image. You can install QEMU and run it with `make run` or if you want to try it on real hardware,
+rename the extension to .iso and burn it onto a USB stick to boot off of. Indeed, floppy images convert directly to ISO images.
