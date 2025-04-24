@@ -90,6 +90,24 @@ void terminal_scrollup(uint8_t n)
 	}
 }
 
+// Remove char from screen *from the current row only*
+void terminal_removechar()
+{
+	if (g_terminal_cursor_y == 0 && g_terminal_cursor_x == 0)
+		return ;
+
+	if (g_terminal_cursor_x > 0)
+		--g_terminal_cursor_x;
+	else
+	{
+		g_terminal_cursor_x = VGA_DEFAULT_WIDTH - 1;
+		--g_terminal_cursor_y;
+	}
+
+	terminal_putblock_at(' ', g_terminal_color,
+				g_terminal_cursor_x, g_terminal_cursor_y);
+}
+
 // Put character and increment cursor
 void terminal_putchar(unsigned char c)
 {
@@ -124,12 +142,14 @@ void terminal_clear_screen(void)
 
 	for (uint8_t y = 0; y < VGA_DEFAULT_HEIGHT; ++y)
 	{
-		const uint8_t row_indx = y * VGA_DEFAULT_WIDTH;
+		const uint16_t row_indx = y * VGA_DEFAULT_WIDTH;
 		for (uint8_t x = 0; x < VGA_DEFAULT_WIDTH; ++x)
 		{
 			g_terminal_buffer[row_indx + x] = clear_block;
 		}
 	}
+	g_terminal_cursor_x = 0;
+	g_terminal_cursor_y = 0;
 }
 
 // Takes a C-string aka. null terminated character array.

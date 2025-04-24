@@ -20,6 +20,7 @@
 
 // Don't bother making a header just for this
 void print_bootup_message();
+void launch_picoshell();
 
 // Very simple function to just test we're getting input.
 void test_keyinput(uint8_t keycode)
@@ -36,15 +37,10 @@ void main()
 
 	init_IDT();
 	init_keyboard();
-	set_keyboard_function(&test_keyinput);
 
 	print_bootup_message();
 	enable_interrupts(); // Re-enable interrupts
-
-	// Testing kmalloc/free
-	uint8_t *ptr = kmalloc(1);
-	*ptr = 2;
-	kfree(ptr);
+	launch_picoshell();
 
 	while (1) // Not optimal, just for testing
 	{}
