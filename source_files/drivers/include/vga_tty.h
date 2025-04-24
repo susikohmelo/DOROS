@@ -43,9 +43,10 @@ void terminal_setcolor(uint8_t color);
 // Combine two colors into a VGA character with a fore and background color.
 uint8_t vga_block_color(uint8_t foreground, uint8_t background);
 
-// Both of these increment the cursor position
+// All of these increment the cursor position
 void terminal_putchar(unsigned char c);
 void terminal_putstring(const unsigned char *c);
+void terminal_removechar();
 
 // Put a block (character + color) at position but does not affect cursor
 void terminal_putblock_at(unsigned char c, uint8_t color, uint8_t x, uint8_t y);

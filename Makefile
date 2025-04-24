@@ -1,6 +1,7 @@
 
 BOOT_SRC = source_files/boot/
 KERN_SRC = source_files/kernel/
+SHEL_SRC = source_files/shell/
 BUILD_DIR  = build/
 BLUEPRINT_DIR = blueprints/
 
@@ -38,11 +39,13 @@ $(BUILD_DIR)bootloader.bin: always
 # KERNEL ----------------------------------------------------------------------
 kernel: $(BUILD_DIR)kernel.bin
 
+# TODO this is kind of messy and should be cut into smaller makefiles
 $(BUILD_DIR)kernel.bin: always
 	$(CC) -c $(KERN_SRC)kernel.c -o $(BUILD_DIR)kernel_c.o
 	$(CC) -c $(KERN_SRC)heap/kmalloc.c -o $(BUILD_DIR)kmalloc.o
 	$(CC) -c $(KERN_SRC)heap/kfree.c -o $(BUILD_DIR)kfree.o
 	$(CC) -c $(KERN_SRC)boot_message.c -o $(BUILD_DIR)boot_message.o
+	$(CC) -c $(SHEL_SRC)picoshell.c -o $(BUILD_DIR)picoshell.o
 	# NOTE! This is highly temporary and just for testing
 	# This needs it's own makefile later
 	$(CC) -c source_files/drivers/vga_tty/vga_tty_printing.c -o $(BUILD_DIR)tty.o
@@ -56,6 +59,7 @@ $(BUILD_DIR)kernel.bin: always
 		$(BUILD_DIR)keyboard.o $(BUILD_DIR)receive_keyboard_interrupts.o \
 		$(BUILD_DIR)interrupt_utils.o $(BUILD_DIR)IDT.o \
 		$(BUILD_DIR)kmalloc.o $(BUILD_DIR)kfree.o \
+		$(BUILD_DIR)picoshell.o \
 		$(BUILD_DIR)tty.o --oformat binary
 
 
