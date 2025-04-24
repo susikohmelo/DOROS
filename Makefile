@@ -3,6 +3,7 @@ BOOT_SRC = source_files/boot/
 KERN_SRC = source_files/kernel/
 SHEL_SRC = source_files/shell/
 BUILD_DIR  = build/
+FLOPPY_DIR  = precompiled_os/
 BLUEPRINT_DIR = blueprints/
 
 # Assembler
@@ -26,6 +27,7 @@ $(BUILD_DIR)floppy_DOROS.img: bootloader kernel
 	cat $(BUILD_DIR)enter32.bin $(BUILD_DIR)partial_kernel.bin > $(BUILD_DIR)kernel.bin
 	dd if=$(BUILD_DIR)bootloader.bin of=$(BUILD_DIR)floppy_DOROS.img conv=notrunc
 	mcopy -i $(BUILD_DIR)floppy_DOROS.img $(BUILD_DIR)kernel.bin "::kernel.bin"
+	mv $(BUILD_DIR)floppy_DOROS.img $(FLOPPY_DIR)
 
 
 # BOOTLOADER ------------------------------------------------------------------
@@ -68,7 +70,7 @@ always:
 	mkdir -p $(BUILD_DIR)
 
 run:
-	qemu-system-i386 -fda $(BUILD_DIR)floppy_DOROS.img
+	qemu-system-i386 -fda $(FLOPPY_DIR)floppy_DOROS.img
 
 debug:
 	bochs -f bochs_config
