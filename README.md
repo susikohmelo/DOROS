@@ -20,7 +20,8 @@ Most of the source_file subfolders have READMEs with a summary of the folder's c
 - Basic TTY functionality (printing characters to video memory with colors)
 - Interrupt based PS/2 keyboard driver
 - Heap allocation (malloc/free like functionality)
-- **Currently working on: an extremely basic shell**
+- Basic shell
+- **Currently working on:** VGA cursor controls
 
 ## How to run?
 Compiling the program is a bit harder when it comes to OS's, since the system you're compiling it on likely has a different arcitechture from the target.
