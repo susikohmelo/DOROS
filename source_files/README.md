@@ -11,6 +11,7 @@
 6. Drivers are hooked up to go
 
 7. Terminal is initialized & boot message printed
+8. Wait for any input & launch shell afterwards
 ```
 
 ## Points of interest
@@ -29,4 +30,7 @@ kernel/
 drivers/
 - keyboard driver
 - terminal driver
+
+shell/
+- picoshell
 ```
