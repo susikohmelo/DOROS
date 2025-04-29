@@ -1,0 +1,14 @@
+services:
+  doros_compile:
+    container_name: doros_compile
+    build:
+      context: doros_compile/.
+    volumes:
+                  - doros_root:/var/
+volumes:
+  doros_root:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ../
