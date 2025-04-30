@@ -1,7 +1,7 @@
 # DOROS
 A simple x86 32-bit OS written from 100% scratch in Assembly and C.
->[!WARNING]
-This project is WIP - expect to see more later, that being said there's already plenty to look at!
+>[!NOTE]
+This project is WIP - expect to see more with time. That being said there's already plenty to look at!
 
 <sub> DOROS booting on real hardware </sub><br>
 <img src="https://github.com/susikohmelo/DOROS/blob/main/readme_files/doros_boot.gif" height="400" />
@@ -17,10 +17,10 @@ Most of the source_file subfolders have READMEs with a summary of the folder's c
 - Global Descriptor Table following a small flat memory model
 ### In 32-bit protected mode
 - Interrupt Descriptor Table
-- Basic TTY functionality (printing characters to video memory with colors)
 - Interrupt based PS/2 keyboard driver
+- Basic TTY functionality (printing characters to video memory with colors)
 - Heap allocation (malloc/free like functionality)
-- Basic shell
+- Basic shell & basic commands for it
 - **Currently working on:** VGA cursor controls
 
 ## How to run?
