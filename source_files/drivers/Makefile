@@ -14,6 +14,7 @@ all: always
 	$(CC) -c vga_tty/vga_tty_printing.c -o $(BUILD_DIR)tty.o
 	$(CC) -c keyboard/keyboard.c -o $(BUILD_DIR)keyboard.o
 	$(ASM) -f elf keyboard/receive_keyboard_interrupts.asm -o $(BUILD_DIR)receive_keyboard_interrupts.o
+	$(ASM) -f elf vga_tty/vga_tty_cursor.asm -o $(BUILD_DIR)vga_tty_cursor.o
 
 always:
 	mkdir -p $(BUILD_DIR)

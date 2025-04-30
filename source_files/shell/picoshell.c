@@ -209,6 +209,7 @@ void launch_picoshell()
 {
 	flush_buffer();
 	launch_message();
+	enable_cursor();
 	set_keyboard_function(&key_catcher); // Redirect keyboard input here
 	write_prompt();
 

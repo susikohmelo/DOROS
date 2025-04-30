@@ -36,6 +36,11 @@ const uint8_t get_color(void);
 const uint8_t get_cursor_x(void);
 const uint8_t get_cursor_y(void);
 
+extern void enable_cursor(void);
+extern void disable_cursor(void);
+extern void move_cursor(uint8_t x, uint8_t y);
+
+
 // Clear screen and set variables up. Not using this is undefined behaviour
 void terminal_init(void);
 void terminal_clear_screen(void);

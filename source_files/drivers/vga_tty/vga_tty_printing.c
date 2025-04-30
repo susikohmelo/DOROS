@@ -29,12 +29,14 @@ void set_cursor_x(uint8_t x)
 	if (x >= VGA_DEFAULT_WIDTH)
 		x = VGA_DEFAULT_WIDTH - 1;
 	g_terminal_cursor_x = x;
+	move_cursor(g_terminal_cursor_x, g_terminal_cursor_y); // update visual
 }
 void set_cursor_y(uint8_t y)
 {
 	if (y >= VGA_DEFAULT_HEIGHT)
 		y = VGA_DEFAULT_HEIGHT - 1;
 	g_terminal_cursor_y = y;
+	move_cursor(g_terminal_cursor_x, g_terminal_cursor_y); // update visual
 }
 
 // Combine individual colors for the foreground and backround together
@@ -106,6 +108,7 @@ void terminal_removechar()
 
 	terminal_putblock_at(' ', g_terminal_color,
 				g_terminal_cursor_x, g_terminal_cursor_y);
+	move_cursor(g_terminal_cursor_x, g_terminal_cursor_y); // update visual
 }
 
 // Put character and increment cursor
@@ -133,6 +136,7 @@ void terminal_putchar(unsigned char c)
 		else
 			terminal_scrollup(1);
 	}
+	move_cursor(g_terminal_cursor_x, g_terminal_cursor_y); // update visual
 }
 
 void terminal_clear_screen(void)

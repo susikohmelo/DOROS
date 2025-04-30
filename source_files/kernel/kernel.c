@@ -31,6 +31,7 @@ void keyboard_init_function(uint8_t keycode) {}
 void main()
 {
 	terminal_init();
+	disable_cursor();
 
 	init_IDT();
 	init_keyboard();
