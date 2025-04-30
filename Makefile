@@ -43,18 +43,14 @@ $(BUILD_DIR)bootloader.bin: always
 kernel: $(BUILD_DIR)kernel.bin
 
 $(BUILD_DIR)kernel.bin: always
+	cd $(KERN_SRC) && make
 	cd $(DRIV_SRC) && make
-	$(CC) -c $(KERN_SRC)kernel.c -o $(BUILD_DIR)kernel_c.o
-	$(CC) -c $(KERN_SRC)heap/kmalloc.c -o $(BUILD_DIR)kmalloc.o
-	$(CC) -c $(KERN_SRC)heap/kfree.c -o $(BUILD_DIR)kfree.o
-	$(CC) -c $(KERN_SRC)boot_message.c -o $(BUILD_DIR)boot_message.o
-	$(CC) -c $(SHEL_SRC)picoshell.c -o $(BUILD_DIR)picoshell.o
-	$(CC) -c source_files/kernel/interrupts/IDT.c -o $(BUILD_DIR)IDT.o
-	$(ASM) -f elf source_files/kernel/interrupts/interrupt_utils.asm -o $(BUILD_DIR)interrupt_utils.o
+	cd $(SHEL_SRC) && make
 	# Yes 0x20200 is hardcoded. It is the location of the kernel
 	$(LD) -o $(BUILD_DIR)partial_kernel.bin -Ttext 0x20200 \
+		$(KERN_SRC)$(BUILD_DIR)*.o \
 		$(DRIV_SRC)$(BUILD_DIR)*.o \
-		$(BUILD_DIR)*.o \
+		$(SHEL_SRC)$(BUILD_DIR)*.o \
 		--oformat binary
 
 # MISC ------------------------------------------------------------------------
@@ -73,3 +69,5 @@ debug:
 clean:
 	rm -rf $(BUILD_DIR)
 	cd $(DRIV_SRC) && make clean
+	cd $(SHEL_SRC) && make clean
+	cd $(KERN_SRC) && make clean
