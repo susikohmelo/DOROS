@@ -2,6 +2,7 @@
 BOOT_SRC = source_files/boot/
 KERN_SRC = source_files/kernel/
 SHEL_SRC = source_files/shell/
+DRIV_SRC = source_files/drivers/
 BUILD_DIR  = build/
 FLOPPY_DIR  = precompiled_os/
 BLUEPRINT_DIR = blueprints/
@@ -41,29 +42,16 @@ $(BUILD_DIR)bootloader.bin: always
 # KERNEL ----------------------------------------------------------------------
 kernel: $(BUILD_DIR)kernel.bin
 
-# TODO this is kind of messy and should be cut into smaller makefiles
 $(BUILD_DIR)kernel.bin: always
-	$(CC) -c $(KERN_SRC)kernel.c -o $(BUILD_DIR)kernel_c.o
-	$(CC) -c $(KERN_SRC)heap/kmalloc.c -o $(BUILD_DIR)kmalloc.o
-	$(CC) -c $(KERN_SRC)heap/kfree.c -o $(BUILD_DIR)kfree.o
-	$(CC) -c $(KERN_SRC)boot_message.c -o $(BUILD_DIR)boot_message.o
-	$(CC) -c $(SHEL_SRC)picoshell.c -o $(BUILD_DIR)picoshell.o
-	# NOTE! This is highly temporary and just for testing
-	# This needs it's own makefile later
-	$(CC) -c source_files/drivers/vga_tty/vga_tty_printing.c -o $(BUILD_DIR)tty.o
-	$(CC) -c source_files/drivers/keyboard/keyboard.c -o $(BUILD_DIR)keyboard.o
-	$(CC) -c source_files/kernel/interrupts/IDT.c -o $(BUILD_DIR)IDT.o
-	$(ASM) -f elf source_files/kernel/interrupts/interrupt_utils.asm -o $(BUILD_DIR)interrupt_utils.o
-	$(ASM) -f elf source_files/drivers/keyboard/receive_keyboard_interrupts.asm -o $(BUILD_DIR)receive_keyboard_interrupts.o
+	cd $(KERN_SRC) && make
+	cd $(DRIV_SRC) && make
+	cd $(SHEL_SRC) && make
 	# Yes 0x20200 is hardcoded. It is the location of the kernel
 	$(LD) -o $(BUILD_DIR)partial_kernel.bin -Ttext 0x20200 \
-		$(BUILD_DIR)kernel_c.o $(BUILD_DIR)boot_message.o\
-		$(BUILD_DIR)keyboard.o $(BUILD_DIR)receive_keyboard_interrupts.o \
-		$(BUILD_DIR)interrupt_utils.o $(BUILD_DIR)IDT.o \
-		$(BUILD_DIR)kmalloc.o $(BUILD_DIR)kfree.o \
-		$(BUILD_DIR)picoshell.o \
-		$(BUILD_DIR)tty.o --oformat binary
-
+		$(KERN_SRC)$(BUILD_DIR)*.o \
+		$(DRIV_SRC)$(BUILD_DIR)*.o \
+		$(SHEL_SRC)$(BUILD_DIR)*.o \
+		--oformat binary
 
 # MISC ------------------------------------------------------------------------
 always:
@@ -79,4 +67,7 @@ debug:
 	bochs -f bochs_config
 
 clean:
-	rm -rf $(BUILD_DIR)*
+	rm -rf $(BUILD_DIR)
+	cd $(DRIV_SRC) && make clean
+	cd $(SHEL_SRC) && make clean
+	cd $(KERN_SRC) && make clean
