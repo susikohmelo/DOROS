@@ -21,4 +21,4 @@
 extern uint8_t *g_heap_bitmap; // This is literally just a ptr to the bitmap.
 
 void *kmalloc(uint32_t n_bytes);
-void kfree(uint8_t *ptr);
+void kfree(void *ptr);

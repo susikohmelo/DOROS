@@ -161,6 +161,20 @@ void terminal_putstring(const unsigned char *c)
 		++c;
 	}
 }
+void terminal_puterror(const unsigned char *c)
+{
+	uint8_t color = g_terminal_color;
+	terminal_setcolor(VGA_DEFAULT_ERR_P_COLOR);
+	terminal_putstring("[ ERROR ]");
+	terminal_setcolor(VGA_DEFAULT_ERR_T_COLOR);
+	terminal_putchar(' ');
+	while (*c != '\0')
+	{
+		terminal_putchar(*c);
+		++c;
+	}
+	terminal_setcolor(color);
+}
 
 void terminal_init(void)
 {

@@ -9,9 +9,12 @@
 #define SHELL_PROMPT_FG_COLOR VGA_COLOR_BLACK
 #define SHELL_PROMPT_BG_COLOR VGA_COLOR_GREEN
 
+uint8_t	g_ready_to_execute = false;
 int8_t	g_keybuffer[SHELL_BUF_SIZE + 1]; // + 1 so it's always null terminated
 uint8_t	g_keybuffer_len = 0;
 uint8_t	g_shift_down = 0;
+
+void key_catcher(uint8_t keycode);
 
 // TODO move this into a libk later
 static int8_t k_memcmp(void *s1, void *s2, uint8_t n)
@@ -45,7 +48,7 @@ static void write_prompt()
 
 static inline void invalid_command()
 {
-	terminal_putstring("Unknown command\n");
+	terminal_puterror("Unknown command\n");
 }
 
 // Don't we all love function pointer syntax in C... No? Too bad.
@@ -61,6 +64,8 @@ static inline void (*get_function_ptr(uint8_t *cmd))(uint8_t*)
 		return &cmd_clear;
 	if (k_memcmp(cmd, "math", 4) == 0)
 		return &cmd_math;
+	if (k_memcmp(cmd, "rainbow", 7) == 0)
+		return &cmd_rainbow;
 	return 0;
 }
 
@@ -68,6 +73,7 @@ static inline void (*get_function_ptr(uint8_t *cmd))(uint8_t*)
 // So we can just do a very lazy left to right parsing.
 void execute_buffer()
 {
+	g_ready_to_execute = false;
 	terminal_putchar('\n'); // Newline regardless of what happens next
 				
 	if (g_keybuffer[0] == 0) // Empty cmd
@@ -164,7 +170,7 @@ static void handle_special_input(int8_t key) // Special keys are like commands
 			}
 			return ;
 		case KEY_ENTER:
-			execute_buffer();
+			g_ready_to_execute = true;
 			return ;
 		case KEY_LEFT_SHIFT:
 			g_shift_down = true;
@@ -206,6 +212,9 @@ void launch_picoshell()
 	set_keyboard_function(&key_catcher); // Redirect keyboard input here
 	write_prompt();
 
-	while (1) // TODO inefficient to do this
-	{}
+	loop:
+		__asm__ __volatile__ ("hlt");
+		if (g_ready_to_execute == true)
+			execute_buffer();
+		goto loop;
 }
