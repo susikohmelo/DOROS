@@ -12,7 +12,10 @@
 uint8_t	g_ready_to_execute = false;
 int8_t	g_keybuffer[SHELL_BUF_SIZE + 1]; // + 1 so it's always null terminated
 uint8_t	g_keybuffer_len = 0;
-uint8_t	g_shift_down = 0;
+int8_t	g_keybuffer_pos = 0;
+
+uint8_t g_arrowkey_down = false;
+uint8_t	g_shift_down = false;
 
 void key_catcher(uint8_t keycode);
 
@@ -32,6 +35,7 @@ static void flush_buffer()
 	for (uint8_t i = 0; i < SHELL_BUF_SIZE; ++i)
 		g_keybuffer[i] = 0;
 	g_keybuffer_len = 0;
+	g_keybuffer_pos = 0;
 }
 
 static void write_prompt()
@@ -113,10 +117,35 @@ void execute_buffer()
 	kfree(cmd);
 }
 
+static void shell_move_cursor(int8_t dir)
+{
+	uint8_t x = get_cursor_x();
+	if (g_keybuffer_pos <= 0
+			|| x + dir >= SHELL_PROMPT_SIZE + g_keybuffer_len) 
+		return ;
+	set_cursor_x(x + dir);
+	g_keybuffer_pos += dir;
+}
+
 static void handle_normal_input(int8_t key) // Normal keys are just stored
 {
 	if (g_keybuffer_len >= SHELL_BUF_SIZE)
 		return ;
+	if (g_arrowkey_down) // Input is an arrowkey press
+	{
+		switch (key)
+		{
+			case '2': // down - ignored
+				return ;
+			case '4': // left
+				shell_move_cursor(-1); return ;
+			case '6': // right
+				shell_move_cursor(1); return  ;
+			case '8': // up - ignored
+				return ;
+		}
+		return ;
+	}
 	if (g_shift_down)
 	{
 		if (key >= 'a' && key <= 'z')
@@ -151,9 +180,10 @@ static void handle_normal_input(int8_t key) // Normal keys are just stored
 					key = '+'; break ;
 			}
 		}
-		g_shift_down = false;
 	}
-	g_keybuffer[g_keybuffer_len++] = key;
+	g_keybuffer[g_keybuffer_pos++] = key;
+	g_keybuffer_len = g_keybuffer_pos > g_keybuffer_len \
+		? g_keybuffer_pos : g_keybuffer_len;
 	terminal_putchar(key);
 }
 
@@ -162,10 +192,11 @@ static void handle_special_input(int8_t key) // Special keys are like commands
 	switch (key) // switch is overkill but this list will grow with time
 	{
 		case KEY_BACKSPACE:
-			if (g_keybuffer_len > 0)
+			if (g_keybuffer_pos > 0)
 			{
-				--g_keybuffer_len;
-				g_keybuffer[g_keybuffer_len] = 0;
+				g_keybuffer[g_keybuffer_pos--] = ' ';
+				if (g_keybuffer_pos >= g_keybuffer_len)
+					--g_keybuffer_len;
 				terminal_removechar();
 			}
 			return ;
@@ -180,9 +211,21 @@ static void handle_special_input(int8_t key) // Special keys are like commands
 
 void key_catcher(uint8_t keycode) // Async function called on keyboard interrupt
 {
-	static bool	is_arrowkey = false;
-	int8_t		translated_key = keycode_map[keycode];
+	if (keycode > 127) // Beyond mapped input range
+	{
+		if (keycode == 224) // This comes before a direction key
+		{
+			if (g_arrowkey_down)
+				g_arrowkey_down = false;
+			else
+				g_arrowkey_down = true;
+		}
+		if (keycode == 0xAA) // Shift release key
+			g_shift_down = false;
+		return ;
+	}
 
+	int8_t		translated_key = keycode_map[keycode];
 	if (translated_key > 0) // Normal character pressed
 	{
 		handle_normal_input(translated_key);
@@ -198,7 +241,7 @@ void key_catcher(uint8_t keycode) // Async function called on keyboard interrupt
 static void launch_message()
 {
 	uint8_t	og_color = get_color(); // Terminal color
-	terminal_setcolor(vga_block_color(VGA_COLOR_WHITE,
+	terminal_setcolor(vga_block_color(VGA_COLOR_LIGHT_GRAY,
 					VGA_COLOR_RED));
 	terminal_putstring("\
 You are now in PICOSHELL - Type 'help' for a list of commands.                  ");

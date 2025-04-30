@@ -49,7 +49,7 @@ void handle_keyboard_interrupt()
 	if (status & 0x1) // If a new key has been pressed
 	{
 		uint8_t keycode = ioport_in(KEYBOARD_DATA_PORT);
-		if (g_keyboard_function == 0 || keycode < 0 || keycode >= 128)
+		if (g_keyboard_function == 0)
 			return ;
 		g_keyboard_function(keycode);
 	}

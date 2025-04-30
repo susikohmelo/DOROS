@@ -117,7 +117,7 @@ static void cmd_math(uint8_t *args)
 	if (args == 0 || *args == 0)
 	{
 		terminal_setcolor(vga_block_color(VGA_COLOR_BLACK,
-					VGA_COLOR_WHITE));
+					VGA_COLOR_LIGHT_GRAY));
 		terminal_putstring("Add arguments delimited by spaces. ");
 		terminal_putstring("Order of operations is *not* respected.\n");
 		terminal_setcolor(og_color);
@@ -203,7 +203,7 @@ static void cmd_clear(uint8_t *args)
 static void cmd_help(uint8_t *args)
 {
 	uint8_t	og_color = get_color(); // Terminal color
-	terminal_setcolor(vga_block_color(VGA_COLOR_BLACK, VGA_COLOR_WHITE));
+	terminal_setcolor(vga_block_color(VGA_COLOR_BLACK, VGA_COLOR_LIGHT_GRAY));
 	terminal_putstring("Format: command arg1 arg2 ...\n");
 	terminal_setcolor(og_color);
 
