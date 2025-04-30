@@ -3,7 +3,7 @@
 
 
 // TODO move this into libk later
-static inline void	k_terminal_putnbr(int32_t n)
+void	k_terminal_putnbr(int32_t n)
 {
 	if (n < 0)
 	{

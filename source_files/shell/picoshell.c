@@ -8,6 +8,8 @@
 #define SHELL_BUF_SIZE VGA_DEFAULT_WIDTH - SHELL_PROMPT_SIZE
 #define SHELL_PROMPT_FG_COLOR VGA_COLOR_BLACK
 #define SHELL_PROMPT_BG_COLOR VGA_COLOR_GREEN
+#define SHELL_BAN_FG_COLOR VGA_COLOR_BLACK
+#define SHELL_BAN_BG_COLOR VGA_COLOR_LIGHT_GRAY
 
 uint8_t	g_ready_to_execute = false;
 int8_t	g_keybuffer[SHELL_BUF_SIZE + 1]; // + 1 so it's always null terminated
@@ -18,6 +20,7 @@ uint8_t g_arrowkey_down = false;
 uint8_t	g_shift_down = false;
 
 void key_catcher(uint8_t keycode);
+void k_terminal_putnbr(int32_t n);
 
 // TODO move this into a libk later
 static int8_t k_memcmp(void *s1, void *s2, uint8_t n)
@@ -38,8 +41,56 @@ static void flush_buffer()
 	g_keybuffer_pos = 0;
 }
 
+static void write_banner()
+{
+	uint8_t og_x = get_cursor_x();
+	uint8_t og_y = get_cursor_y();
+	set_cursor_x(0); set_cursor_y(0); // Store old xy and set new to 0
+					  
+	uint8_t	og_color = get_color();
+	uint8_t	ban_color = vga_block_color(SHELL_BAN_FG_COLOR,
+					SHELL_BAN_BG_COLOR);
+	uint8_t	true_color = vga_block_color(VGA_COLOR_GREEN,
+					SHELL_BAN_BG_COLOR);
+	uint8_t	false_color = vga_block_color(VGA_COLOR_RED,
+					SHELL_BAN_BG_COLOR);
+
+	terminal_setcolor(ban_color); // Flush the first row of characters
+	for (uint8_t i = 0; i < VGA_DEFAULT_WIDTH; ++i)
+		terminal_putchar(' ');
+	set_cursor_y(0);
+
+	terminal_putstring(" X: ");
+	k_terminal_putnbr(g_keybuffer_pos);
+	set_cursor_x(8);
+	terminal_putstring("Y: ");
+	k_terminal_putnbr(og_y);
+	set_cursor_x(8 + 10);
+
+	terminal_putstring("buffer-len: ");
+	k_terminal_putnbr(g_keybuffer_len);
+
+	set_cursor_x(8 + 10 + 14 + 6);
+	terminal_putstring("shift: ");
+	if (g_shift_down)
+	{
+		terminal_setcolor(true_color);
+		terminal_putstring("true");
+	}
+	else
+	{
+		terminal_setcolor(false_color);
+		terminal_putstring("false");
+	}
+
+	terminal_setcolor(og_color);
+	set_cursor_x(og_x); set_cursor_y(og_y);
+}
+
 static void write_prompt()
 {
+	if (get_cursor_y() == 0)
+		set_cursor_y(1);
 	uint8_t	og_color = get_color(); // Terminal color
 	terminal_setcolor(vga_block_color(SHELL_PROMPT_FG_COLOR,
 					SHELL_PROMPT_BG_COLOR));
@@ -194,9 +245,9 @@ static void handle_special_input(int8_t key) // Special keys are like commands
 		case KEY_BACKSPACE:
 			if (g_keybuffer_pos > 0)
 			{
-				g_keybuffer[g_keybuffer_pos--] = ' ';
 				if (g_keybuffer_pos >= g_keybuffer_len)
 					--g_keybuffer_len;
+				g_keybuffer[g_keybuffer_pos--] = ' ';
 				terminal_removechar();
 			}
 			return ;
@@ -220,7 +271,7 @@ void key_catcher(uint8_t keycode) // Async function called on keyboard interrupt
 			else
 				g_arrowkey_down = true;
 		}
-		if (keycode == 0xAA) // Shift release key
+		else if (keycode == 0xAA) // Shift release key
 			g_shift_down = false;
 		return ;
 	}
@@ -251,14 +302,26 @@ You are now in PICOSHELL - Type 'help' for a list of commands.                  
 void launch_picoshell()
 {
 	flush_buffer();
-	launch_message();
 	enable_cursor();
 	set_keyboard_function(&key_catcher); // Redirect keyboard input here
+	terminal_putchar('\n');
+	launch_message();
 	write_prompt();
 
+	uint8_t	active_arrow_counter = 0; // Sometimes the arrow key doesn't
+					  // send the release signal.
+					  // This is a timer to switch it off
+					  // if it doesnt
 	loop:
 		__asm__ __volatile__ ("hlt");
 		if (g_ready_to_execute == true)
 			execute_buffer();
+		write_banner(); // Update key-info
+		if (g_arrowkey_down)
+		{
+			++active_arrow_counter;
+			if (active_arrow_counter > 1)
+				active_arrow_counter = g_arrowkey_down = false;
+		}
 		goto loop;
 }
