@@ -2,6 +2,6 @@ megs: 128
 romimage: file=/usr/share/bochs/BIOS-bochs-latest
 vgaromimage: file=/usr/share/bochs/VGABIOS-lgpl-latest
 mouse: enabled=0
-floppya: 1_44=build/floppy_DOROS.img, status=inserted
+floppya: 1_44=precompiled_os/floppy_DOROS.img, status=inserted
 boot: floppy
 display_library: sdl2, options="gui_debug"

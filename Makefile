@@ -14,7 +14,7 @@ CC = i386-elf-gcc -ffreestanding -m32 -g -O2 -std=gnu99  -ggdb
 # Linker used
 LD = i386-elf-ld
 
-.PHONY: all floppy_img kernel bootloader clean always blueprints_fat
+.PHONY: all floppy_img kernel bootloader clean always blueprints_fat docker
 
 all: floppy_img blueprints_fat
 
@@ -68,6 +68,9 @@ $(BUILD_DIR)kernel.bin: always
 # MISC ------------------------------------------------------------------------
 always:
 	mkdir -p $(BUILD_DIR)
+
+docker:
+	cd docker && sudo docker compose up --build
 
 run:
 	qemu-system-i386 -fda $(FLOPPY_DIR)floppy_DOROS.img

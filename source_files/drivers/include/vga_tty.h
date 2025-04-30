@@ -2,6 +2,8 @@
 #define VGA_DEFAULT_HEIGHT	25
 #define VGA_DEFAULT_LOCATION	0xb8000
 #define VGA_DEFAULT_COLOR	0x07 // Light gray on black
+#define VGA_DEFAULT_ERR_P_COLOR	0x40 // Black on red
+#define VGA_DEFAULT_ERR_T_COLOR	0x04 // Red on black
 
 // This header is part of the compiler and not the C library.
 #include <stdint.h>
@@ -46,6 +48,7 @@ uint8_t vga_block_color(uint8_t foreground, uint8_t background);
 // All of these increment the cursor position
 void terminal_putchar(unsigned char c);
 void terminal_putstring(const unsigned char *c);
+void terminal_puterror(const unsigned char *c);
 void terminal_removechar();
 
 // Put a block (character + color) at position but does not affect cursor

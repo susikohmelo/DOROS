@@ -28,10 +28,10 @@ static inline uint32_t get_page_count(uint8_t *ptr)
 	return ( *((uint32_t*) (ptr - HEAP_PTR_HEADER_SIZE)) );
 }
 
-void kfree(uint8_t *ptr)
+void kfree(void *ptr)
 {
 	// Pages to free
-	uint32_t page_count = get_page_count(ptr);
+	uint32_t page_count = get_page_count((uint8_t*)ptr);
 
 	// Get the bit position of the address on the bitmap
 	uint32_t bit_pos = ((uint32_t) ptr - HEAP_POS - HEAP_PTR_HEADER_SIZE)
