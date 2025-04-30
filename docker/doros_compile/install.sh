@@ -61,6 +61,5 @@ ls "/usr/local/i386elfgcc/bin"
 alias i386-elf-gcc="/usr/local/i386elfgcc/bin/i386-elf-c++"
 
 # After the installation is complete we will just run the makefile
-# The root of the doros repo is mounted at /var in the docker image
-cd /var
+cd /doros
 sudo make

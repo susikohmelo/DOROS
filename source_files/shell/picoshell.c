@@ -11,6 +11,7 @@
 
 int8_t	g_keybuffer[SHELL_BUF_SIZE + 1]; // + 1 so it's always null terminated
 uint8_t	g_keybuffer_len = 0;
+uint8_t	g_shift_down = 0;
 
 // TODO move this into a libk later
 static int8_t k_memcmp(void *s1, void *s2, uint8_t n)
@@ -58,6 +59,8 @@ static inline void (*get_function_ptr(uint8_t *cmd))(uint8_t*)
 		return &cmd_ls;
 	if (k_memcmp(cmd, "clear", 5) == 0)
 		return &cmd_clear;
+	if (k_memcmp(cmd, "math", 4) == 0)
+		return &cmd_math;
 	return 0;
 }
 
@@ -89,8 +92,8 @@ void execute_buffer()
 		cmd[i] = g_keybuffer[i];
 	cmd[pos] = 0;
 
-	void (*f)(uint8_t*) = get_function_ptr(cmd);
-	if (f == 0) // Invalid command
+	void (*fun)(uint8_t*) = get_function_ptr(cmd);
+	if (fun == 0) // Invalid command
 	{
 		invalid_command();
 		flush_buffer();
@@ -98,8 +101,7 @@ void execute_buffer()
 		kfree(cmd);
 		return ;
 	}
-	// TODO argument parsing should go here
-	f(0);
+	fun(g_keybuffer + pos + 1 * (pos < SHELL_BUF_SIZE - 1));
 	flush_buffer();
 	write_prompt();
 	kfree(cmd);
@@ -109,6 +111,42 @@ static void handle_normal_input(int8_t key) // Normal keys are just stored
 {
 	if (g_keybuffer_len >= SHELL_BUF_SIZE)
 		return ;
+	if (g_shift_down)
+	{
+		if (key >= 'a' && key <= 'z')
+			key -= ('a' - 'A');
+		else
+		{
+			switch (key)
+			{
+				case '0':
+					key = ')'; break ;
+				case '1':
+					key = '!'; break ;
+				case '2':
+					key = '@'; break ;
+				case '3':
+					key = '#'; break ;
+				case '4':
+					key = '$'; break ;
+				case '5':
+					key = '%'; break ;
+				case '6':
+					key = '^'; break ;
+				case '7':
+					key = '&'; break ;
+				case '8':
+					key = '*'; break ;
+				case '9':
+					key = '('; break ;
+				case '-':
+					key = '_'; break ;
+				case '=':
+					key = '+'; break ;
+			}
+		}
+		g_shift_down = false;
+	}
 	g_keybuffer[g_keybuffer_len++] = key;
 	terminal_putchar(key);
 }
@@ -127,6 +165,9 @@ static void handle_special_input(int8_t key) // Special keys are like commands
 			return ;
 		case KEY_ENTER:
 			execute_buffer();
+			return ;
+		case KEY_LEFT_SHIFT:
+			g_shift_down = true;
 			return ;
 	}
 }

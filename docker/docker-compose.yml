@@ -4,7 +4,7 @@ services:
     build:
       context: doros_compile/.
     volumes:
-                  - doros_root:/var/
+                  - doros_root:/doros
 volumes:
   doros_root:
     driver: local

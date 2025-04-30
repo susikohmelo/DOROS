@@ -3,7 +3,7 @@
 
 
 // TODO move this into libk later
-static inline void	k_terminal_putnbr(int16_t n)
+static inline void	k_terminal_putnbr(int32_t n)
 {
 	if (n < 0)
 	{
@@ -15,10 +15,10 @@ static inline void	k_terminal_putnbr(int16_t n)
 	terminal_putchar(n % 10 + '0');
 }
 
-static inline int8_t k_atoi(const uint8_t *nptr)
+static inline int32_t k_atoi(const uint8_t *nptr)
 {
-	int8_t	resulting_int;
-	uint8_t	sign;
+	int32_t	resulting_int;
+	int8_t	sign;
 
 	resulting_int = 0;
 	sign = 1;
@@ -47,28 +47,32 @@ static void cmd_math(uint8_t *args)
 		terminal_putstring("Integers only - overflow not checked.\n");
 		terminal_putstring("Example:\n");
 		terminal_putstring("math 1 + 41\n");
+		return ;
 	}
-	if (*args < '0' && *args > '9')
+	if (*args < '0' && *args > '9' && *args != '-')
 		goto error;
 
+	uint8_t *og_args = args;
 	uint8_t	operator = 0;
-	int8_t	a = k_atoi(args); // Get first argument and update position
-	while (*args >= '0' && *args <= '9')
+	int32_t	a = k_atoi(args); // Get first argument and update position
+	while ((*args >= '0' && *args <= '9') || *args == '-')
 		++args;
-	int8_t	b = 0;
+	int32_t	b = 0;
 
 	while (*args)
 	{
 		if (*args == ' ')
-			continue ;
-		if (*args < '0' && *args > '9')
+			{ ++args; continue ; }
+
+		if (*args < '0' || *args > '9'
+				|| (*args == '-' && args[1] == ' '))
 		{
 			operator = *args;
 			++args;
 			continue ;
 		}
-		b = k_atoi(*args);
-		while (*args >= '0' && *args <= '9')
+		b = k_atoi(args);
+		while ((*args >= '0' && *args <= '9') || *args == '-')
 			++args;
 		if (operator == 0) // Number without operand
 			goto error;
@@ -95,6 +99,7 @@ static void cmd_math(uint8_t *args)
 	if (operator != 0)
 		goto error;
 
+	terminal_putstring(og_args);
 	terminal_putstring(" = ");
 	k_terminal_putnbr(a);
 	terminal_putchar('\n');
@@ -102,7 +107,6 @@ static void cmd_math(uint8_t *args)
 
 	error:
 		terminal_putstring("Invalid input\n");
-		return ;
 }
 
 static void cmd_ls(uint8_t *args)
