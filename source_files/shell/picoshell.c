@@ -316,12 +316,12 @@ void launch_picoshell()
 		__asm__ __volatile__ ("hlt");
 		if (g_ready_to_execute == true)
 			execute_buffer();
-		write_banner(); // Update key-info
 		if (g_arrowkey_down)
 		{
 			++active_arrow_counter;
 			if (active_arrow_counter > 1)
 				active_arrow_counter = g_arrowkey_down = false;
 		}
+		write_banner(); // Update key-info
 		goto loop;
 }

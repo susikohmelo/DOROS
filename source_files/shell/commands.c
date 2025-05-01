@@ -40,7 +40,7 @@ static inline int32_t k_atoi(const uint8_t *nptr)
 }
 
 #define VGA_BUF_SIZE VGA_DEFAULT_HEIGHT * VGA_DEFAULT_WIDTH
-static uint8_t g_rainbow_stop = false;
+static uint8_t g_rainbow_stop = true;
 
 void run_rainbow()
 {
@@ -60,38 +60,41 @@ void run_rainbow()
 	}
 }
 
-void exit_rainbow(uint8_t stop)
+void exit_rainbow(uint8_t key)
 {
-	g_rainbow_stop = true;
+	if (key > 127)
+		return ;
+	int8_t translated_key = keycode_map[key];
+	if (translated_key == KEY_ESCAPE)
+		g_rainbow_stop = true;
+}
+
+void enter_rainbow(uint8_t key)
+{
+	if (key > 127)
+		return ;
+	int8_t translated_key = keycode_map[key];
+	if (translated_key == KEY_ENTER)
+		g_rainbow_stop = false;
 }
 
 static void cmd_rainbow(uint8_t *args)
 {
-	// Store characters on screen ---------------------------------------
-	uint8_t		old_x = get_cursor_x();
-	uint8_t		old_y = get_cursor_y();
-	uint16_t	*old_buf;
-	old_buf = kmalloc(VGA_BUF_SIZE * 2);
-	if (!old_buf)
-		return ;
-	for (uint16_t i = 0; i < VGA_BUF_SIZE; ++i)
-	{
-		old_buf[i] = ((uint16_t *)VGA_DEFAULT_LOCATION)[i];
-	}
 	terminal_clear_screen();
+	disable_cursor();
 
-	g_rainbow_stop = false;
+	g_rainbow_stop = true;
+	terminal_putstring("Press ENTER to start - ESC to stop");
+	while (g_rainbow_stop)
+	{
+		asm("hlt");
+		set_keyboard_function(&enter_rainbow);
+	}
 	set_keyboard_function(&exit_rainbow);
 	run_rainbow();
 
-	// Restore characters on screen ------------------------------------
-	set_cursor_x(old_x);
-	set_cursor_y(old_y);
-	for (uint16_t i = 0; i < VGA_DEFAULT_HEIGHT * VGA_DEFAULT_WIDTH; ++i)
-	{
-		((uint16_t *)VGA_DEFAULT_LOCATION)[i] = old_buf[i];
-	}
-	kfree(old_buf);
+	terminal_clear_screen();
+	enable_cursor();
 	set_keyboard_function(&key_catcher);
 }
 
