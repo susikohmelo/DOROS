@@ -89,6 +89,7 @@ static void write_banner()
 
 static void write_prompt()
 {
+	__asm__ __volatile__ ("cli"); // Disable interrupts
 	if (get_cursor_y() == 0)
 		set_cursor_y(1);
 	uint8_t	og_color = get_color(); // Terminal color
@@ -97,6 +98,7 @@ static void write_prompt()
 	terminal_putstring("[ PICOSHELL ]");
 	terminal_setcolor(og_color);
 	terminal_putstring(" > ");
+	__asm__ __volatile__ ("sti"); // Disable interrupts
 }
 
 #include "commands.c" // cmd_help etc.
@@ -310,6 +312,8 @@ void launch_picoshell()
 		if (g_ready_to_execute == true)
 			execute_buffer();
 		g_arrowkey_down = false;
+		__asm__ __volatile__ ("cli"); // Disable interrupts
 		write_banner(); // Update key-info
+		__asm__ __volatile__ ("sli"); // Enable interrupts
 		goto loop;
 }

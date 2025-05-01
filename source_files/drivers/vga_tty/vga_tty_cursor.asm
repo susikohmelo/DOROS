@@ -19,7 +19,7 @@ enable_cursor:
 	inc	dx ; 0x3D5
 	; Bit structure of the register:
 	; [ unused 3 bits ] [dis/enable cursor 1 bit] [cursor shape 4 bits]
-	mov	al, 0x02 ; Controls height of the cursor. 0x00 to 0xF
+	mov	al, 0x00 ; Controls height of the cursor. 0x00 to 0xF
 	out	dx, al
 
 	pop	edx
