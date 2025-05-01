@@ -184,6 +184,7 @@ static void handle_normal_input(int8_t key) // Normal keys are just stored
 		return ;
 	if (g_arrowkey_down) // Input is an arrowkey press
 	{
+		g_arrowkey_down = false;
 		switch (key)
 		{
 			case '2': // down - ignored
@@ -265,12 +266,7 @@ void key_catcher(uint8_t keycode) // Async function called on keyboard interrupt
 	if (keycode > 127) // Beyond mapped input range
 	{
 		if (keycode == 224) // This comes before a direction key
-		{
-			if (g_arrowkey_down)
-				g_arrowkey_down = false;
-			else
-				g_arrowkey_down = true;
-		}
+			g_arrowkey_down = true;
 		else if (keycode == 0xAA) // Shift release key
 			g_shift_down = false;
 		return ;
@@ -308,20 +304,12 @@ void launch_picoshell()
 	launch_message();
 	write_prompt();
 
-	uint8_t	active_arrow_counter = 0; // Sometimes the arrow key doesn't
-					  // send the release signal.
-					  // This is a timer to switch it off
-					  // if it doesnt
 	loop:
+		g_arrowkey_down = false;
 		__asm__ __volatile__ ("hlt");
 		if (g_ready_to_execute == true)
 			execute_buffer();
-		if (g_arrowkey_down)
-		{
-			++active_arrow_counter;
-			if (active_arrow_counter > 1)
-				active_arrow_counter = g_arrowkey_down = false;
-		}
+		g_arrowkey_down = false;
 		write_banner(); // Update key-info
 		goto loop;
 }
