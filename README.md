@@ -18,10 +18,11 @@ Most of the source_file subfolders have READMEs with a summary of the folder's c
 ### In 32-bit protected mode
 - Interrupt Descriptor Table
 - Interrupt based PS/2 keyboard driver
-- Basic TTY functionality (printing characters to video memory with colors)
 - Heap allocation (malloc/free like functionality)
+- Basic TTY functionality (printing characters to video memory with colors)
+- VGA text cursor controls
 - Basic shell & basic commands for it
-- **Currently working on:** VGA cursor controls
+- **Currently working on:** basic VGA graphics driver ("real" graphics instead of text) 
 
 ## How to compile?
 
