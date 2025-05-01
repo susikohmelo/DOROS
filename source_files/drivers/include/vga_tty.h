@@ -32,6 +32,7 @@ enum	e_vga_color
 // Cursor is the position where the characters are put on screen
 void set_cursor_x(uint8_t x);
 void set_cursor_y(uint8_t y);
+void set_ignore_rows(uint8_t n);
 const uint8_t get_color(void);
 const uint8_t get_cursor_x(void);
 const uint8_t get_cursor_y(void);

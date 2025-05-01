@@ -3,15 +3,20 @@
 #include <stdint.h>
 
 #include "../include/vga_tty.h"
+#include "../../kernel/heap/heap.h"
 
 // Please note! The cursor is not visually shown in any way.
 // Any visual effects of the cursor will have to be done by the caller.
+uint8_t		g_terminal_ignore_row;
 uint8_t		g_terminal_cursor_x;
 uint8_t		g_terminal_cursor_y;
 uint8_t		g_terminal_color;
 uint16_t	*g_terminal_buffer;
 
-// These may be useful for the aforementioned visuals
+void set_ignore_rows(uint8_t n)
+{
+	g_terminal_ignore_row = n;
+}
 const uint8_t get_cursor_x(void)
 {
 	return (g_terminal_cursor_x);
@@ -69,7 +74,7 @@ void terminal_scrollup(uint8_t n)
 	uint16_t *dst;
 	uint16_t src_row;
 	uint16_t dst_row;
-	for (uint8_t y = n; y < VGA_DEFAULT_HEIGHT; ++y)
+	for (uint8_t y = n + g_terminal_ignore_row; y < VGA_DEFAULT_HEIGHT; ++y)
 	{
 		dst_row = (y - n) * VGA_DEFAULT_WIDTH;
 		src_row = y * VGA_DEFAULT_WIDTH;
@@ -144,7 +149,7 @@ void terminal_clear_screen(void)
 	// Character (block) used to clear the screen with.
 	const uint16_t clear_block = vga_block(' ', g_terminal_color);
 
-	for (uint8_t y = 0; y < VGA_DEFAULT_HEIGHT; ++y)
+	for (uint8_t y = g_terminal_ignore_row; y < VGA_DEFAULT_HEIGHT; ++y)
 	{
 		const uint16_t row_indx = y * VGA_DEFAULT_WIDTH;
 		for (uint8_t x = 0; x < VGA_DEFAULT_WIDTH; ++x)

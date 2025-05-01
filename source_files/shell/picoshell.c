@@ -98,7 +98,7 @@ static void write_prompt()
 	terminal_putstring("[ PICOSHELL ]");
 	terminal_setcolor(og_color);
 	terminal_putstring(" > ");
-	__asm__ __volatile__ ("sti"); // Disable interrupts
+	__asm__ __volatile__ ("sti"); // Enable interrupts
 }
 
 #include "commands.c" // cmd_help etc.
@@ -299,6 +299,7 @@ You are now in PICOSHELL - Type 'help' for a list of commands.                  
 
 void launch_picoshell()
 {
+	set_ignore_rows(1); // Ignore row 1 on scrollup() && clearscreen();
 	flush_buffer();
 	enable_cursor();
 	set_keyboard_function(&key_catcher); // Redirect keyboard input here
@@ -314,6 +315,6 @@ void launch_picoshell()
 		g_arrowkey_down = false;
 		__asm__ __volatile__ ("cli"); // Disable interrupts
 		write_banner(); // Update key-info
-		__asm__ __volatile__ ("sli"); // Enable interrupts
+		__asm__ __volatile__ ("sti"); // Enable interrupts
 		goto loop;
 }
