@@ -9,5 +9,5 @@ recieve_mouse_interrupt:
 	cld	; clear direction. This is usually not necessary but why not.
 	call	handle_mouse_interrupt
 	popad
-	iretd	; Return from interrupt
+	iret	; Return from interrupt
 

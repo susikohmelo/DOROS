@@ -61,7 +61,8 @@ docker:
 	cd docker && sudo docker compose up --build
 
 run:
-	qemu-system-i386 -fda $(FLOPPY_DIR)floppy_DOROS.img
+	# qemu-system-i386 -fda $(FLOPPY_DIR)floppy_DOROS.img
+	qemu-system-x86_64 -fda $(FLOPPY_DIR)floppy_DOROS.img
 
 debug:
 	bochs -f bochs_config
