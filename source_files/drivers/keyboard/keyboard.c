@@ -33,8 +33,9 @@ void init_keyboard()
 	* From right to left the ports are 0-7.
 	* So we are setting port 1 as 0, aka not masked.
 	*/
-	ioport_out(PIC1_DATA_PORT, 0xFD);
-	// TODO this might overwrite the mask of another driver
+	uint8_t mask = ioport_in(PIC1_DATA_PORT); // Get current mask
+	mask &= 0xFD;
+	ioport_out(PIC1_DATA_PORT, mask);
 }
 
 // This gets called on keyboard interrupts

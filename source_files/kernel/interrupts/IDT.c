@@ -21,9 +21,9 @@ void init_IDT()
 	ioport_out(PIC1_DATA_PORT, 0x20);
 	ioport_out(PIC2_DATA_PORT, 0x28);
 
-	// ICW3 ( cascade settings. We're not touching this for now.  )
-	ioport_out(PIC1_DATA_PORT, 0x0);
-	ioport_out(PIC2_DATA_PORT, 0x0);
+	// ICW3 ( cascade settings. Tell PIC1 that there is a slave at IRQ2  )
+	ioport_out(PIC1_DATA_PORT, 0x04); // bits 0000 0100
+	ioport_out(PIC2_DATA_PORT, 0x02); // bits 0000 0010
 
 	// ICW4 ( environment info. not 100% sure what it *really* does. )
 	ioport_out(PIC1_DATA_PORT, 0x1);
