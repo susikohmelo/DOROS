@@ -11,28 +11,23 @@ void set_mouse_function(void (*f)(uint32_t))
 	g_mouse_function = f;
 }
 
-void wait_for_mouse(uint8_t type)
+void wait_for_mouse(uint8_t poll_type)
 {
-	uint32_t time_out = 1000000;
+	uint32_t max_iterations = 2000000;
 
-	if (type == 0)
+	if (poll_type == 0)
 	{
-		while (--time_out)
-		{
+		while (--max_iterations)
 			if ((ioport_in(0x64) & 1) == 1)
-				return;
-		}
-		return;
+				break;
 	}
 	else
 	{
-		while (--time_out)
-		{
+		while (--max_iterations)
 			if ((ioport_in(0x64) & 2) == 0)
-				return;
-		}
-		return;
+				break;
 	}
+	return;
 }
 
 
