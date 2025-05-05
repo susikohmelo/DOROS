@@ -13,19 +13,25 @@ void set_mouse_function(void (*f)(uint32_t))
 
 void wait_for_mouse(uint8_t poll_type)
 {
-	uint32_t max_iterations = 2000000;
+	uint32_t max_iterations = 1000000;
 
 	if (poll_type == 0)
 	{
 		while (--max_iterations)
+		{
+			__asm__ __volatile__ ("pause");
 			if ((ioport_in(0x64) & 1) == 1)
 				break;
+		}
 	}
 	else
 	{
 		while (--max_iterations)
+		{
+			__asm__ __volatile__ ("pause");
 			if ((ioport_in(0x64) & 2) == 0)
 				break;
+		}
 	}
 	return;
 }
@@ -40,25 +46,36 @@ static void write_to_mouse(uint8_t data)
 	ioport_out(0x60, data); // Give our boy the good news.
 }
 
+static uint8_t read_from_mouse()
+{
+	wait_for_mouse(0);
+	return (ioport_in(0x60));
+}
+
 void init_mouse()
 {
 	uint8_t compaq;
+	
+	wait_for_mouse(1);
+	ioport_out(0x64, 0xA8); // Enable AUX input
 
 	// Get compaq status
+	wait_for_mouse(1);
 	ioport_out(0x64, 0x20);
+
 	wait_for_mouse(0);
 	compaq = (ioport_in(0x60) | 2); // Enable bit 1 (IRQ12 enable)
-	compaq &= 0xDF; // Clear bit 5 (mouse clock)
+	// compaq &= 0b11011111; // Clear bit 5 (mouse clock)
+	wait_for_mouse(1);
 	ioport_out(0x64, 60);
 	wait_for_mouse(1);
 	ioport_out(0x60, compaq);
-	wait_for_mouse(1);
 
-	ioport_out(0x64, 0xA8); // Enable AUX input
-	wait_for_mouse(1);
+	write_to_mouse(0xF6);
+	read_from_mouse();
 
 	write_to_mouse(0xF4);
-	wait_for_mouse(1);
+	read_from_mouse();
 
 	// The IDT is just an array of entries.
 	struct IDT_entry *IDT = get_IDT();

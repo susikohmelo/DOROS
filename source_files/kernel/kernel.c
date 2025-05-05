@@ -31,7 +31,7 @@ void main()
 
 	init_IDT();
 	init_keyboard();
-	// init_mouse(); NOT FULLY IMPLEMENTED!
+	init_mouse(); //NOT FULLY IMPLEMENTED!
 
 	print_bootup_message();
 	enable_interrupts(); // Re-enable interrupts
