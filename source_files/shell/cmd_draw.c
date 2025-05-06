@@ -18,6 +18,7 @@ static float	g_mouse_x;
 static float	g_mouse_y;
 static bool	g_l_down;
 static bool	g_r_down;
+static uint8_t *g_fonts;
 
 static bool	g_exit_draw = false;
 
@@ -90,20 +91,21 @@ static inline void show_mouse_on_screen()
 			(uint8_t) g_mouse_x, (uint8_t) g_mouse_y);
 }
 
-static void flood_fill(uint8_t x, uint8_t y)
+static void flood_fill(uint8_t x, uint8_t y, uint8_t t_clr, bool original)
 {
 	if (y == 0 || x >= VGA_DEFAULT_WIDTH || y >= VGA_DEFAULT_HEIGHT)
 		return ;
 
 	uint8_t cur_clr = (((uint16_t*) VGA_DEFAULT_LOCATION)[VGA_DEFAULT_WIDTH
 		* y + x]) >> 8;
-	if (cur_clr == g_draw_color)
+	if (!original && (cur_clr == g_draw_color
+			|| (cur_clr != t_clr && cur_clr != g_draw_color)))
 		return ;
 	terminal_putblock_at(' ', g_draw_color, x, y);
-	flood_fill(x + 1, y);
-	flood_fill(x - 1, y);
-	flood_fill(x, y + 1);
-	flood_fill(x, y - 1);
+	flood_fill(x + 1, y, t_clr, 0);
+	flood_fill(x - 1, y, t_clr, 0);
+	flood_fill(x, y + 1, t_clr, 0);
+	flood_fill(x, y - 1, t_clr, 0);
 }
 
 static inline void choose_color()
@@ -123,10 +125,14 @@ static inline void init_globals()
 	g_r_down = false;
 	g_prev_pos[0] = 0;
 	g_prev_pos[1] = 0;
+	get_fonts(g_fonts);
 }
 
 static void cmd_draw(uint8_t *args)
 {
+	g_fonts = kmalloc(4096);
+	if (!g_fonts)
+		return;
 	__asm__ __volatile__ ("cli");
 
 	set_keyboard_function(&exit_draw);
@@ -145,7 +151,7 @@ static void cmd_draw(uint8_t *args)
 		__asm__ __volatile__ ("CLI");
 		if (g_r_down && (uint8_t)g_mouse_y != 0)
 		{
-			flood_fill(g_mouse_x, g_mouse_y);
+			flood_fill(g_mouse_x, g_mouse_y, g_prev_char >> 8, 1);
 			store_new_prev_character(0);
 		}
 		if (g_l_down)
@@ -171,4 +177,5 @@ static void cmd_draw(uint8_t *args)
 	set_ignore_rows(0);
 	set_mouse_function(0);
 	set_keyboard_function(&key_catcher);
+	kfree(g_fonts);
 }
