@@ -3,7 +3,7 @@ BUILD_DIR  = build/
 # Assembler
 ASM = nasm
 
-INCLUDES= -I./include -I../shell -I../kernel/interrupts -I../kernel/heap
+INCLUDES= -I./include -I../shell -I../kernel/interrupts -I../kernel/heap -I../klib
 
 # C cross compiler
 CC = /usr/local/i386elfgcc/bin/i386-elf-gcc -ffreestanding -m32 -g -O2 -std=gnu99 -ggdb $(INCLUDES)

@@ -1,6 +1,5 @@
 #include <IDT.h>
 #include <mouse.h>
-#include <vga_tty.h>
 #include <stdbool.h>
 
 // ASM function that gets called before the real handler
@@ -8,16 +7,10 @@ extern void	recieve_mouse_interrupt();
 
 void (*g_mouse_function)(int16_t, int16_t, bool, bool) = 0;
 
-void set_mouse_function(void (*f)(int16_t, in16_t, bool, bool))
+void set_mouse_function(void (*f)(int16_t, int16_t, bool, bool))
 {
 	g_mouse_function = f;
 }
-
-/*
-
-void mouse_handler()
-{
-}*/
 
 static void wait_for_mouse(uint8_t input_type)
 {
@@ -126,45 +119,41 @@ void handle_mouse_interrupt()
 	static uint8_t	mouse_byte1;
 	//static int8_t	mouse_byte[3];	// Mouse sends us a 3 bytes in it
 					// This happens in separate IRQs
-	static uint8_t	u_mouse_x = 0;	// Relative change in mouse_x
-	static uint8_t	u_mouse_y = 0;	// Relative change in mouse_y
-	static uint8_t	mouse_x_sign = 0;
-	static uint8_t	mouse_y_sign = 0;
+	static int16_t	mouse_x = 0;	// Relative change in mouse_x
+	static int16_t	mouse_y = 0;	// Relative change in mouse_y
+	    
+    if (!(ioport_in(0x64) & 0x20))
+	{
+		ioport_out(PIC1_CMD_PORT, 0x20);
+		ioport_out(PIC2_CMD_PORT, 0x20);
+		return ;
+	}
 
 	switch(mouse_cycle)
 	{
 		case 0:
 			mouse_byte1 = ioport_in(0x60);
-			mouse_x_sign = (mouse_byte1 & 0b00010000) != 0;
-			mouse_y_sign = (mouse_byte1 & 0b00100000) != 0;
 			break;
 		case 1:
-			u_mouse_x = ioport_in(0x60);
+			mouse_x = ioport_in(0x60);
 			break;
 		case 2:
-			u_mouse_y = ioport_in(0x60);
-		break;
+			mouse_y = ioport_in(0x60);
+			break;
 	}
 	mouse_cycle = (mouse_cycle + 1) % 3; // Limit range to 0-2
 
-	if (mouse_cycle != 0) // We still have more packets to parse!
-		return ;
-
-	// Done reading the whole mouse packet, reset both PICs.
+	// Reset the PICs
 	ioport_out(PIC1_CMD_PORT, 0x20);
 	ioport_out(PIC2_CMD_PORT, 0x20);
 
+	if (mouse_cycle != 0) // We still have more packets to parse!
+		return ;
 	if (g_mouse_function == 0)
 		return ;
+
 	bool	l_click = (mouse_byte1 & 0b00000001) != 0;
 	bool	r_click = (mouse_byte1 & 0b00000010) != 0;
 
-	int16_t	mouse_x = (u_mouse_x | (mouse_x_sign << 15));
-	int16_t	mouse_y = (u_mouse_y | (mouse_y_sign << 15));
-
-	terminal_putchar(mouse_x + '5');
-	terminal_putchar(' ');
-	terminal_putchar(mouse_y + '5');
-	terminal_putchar('\n');
 	g_mouse_function(mouse_x, mouse_y, l_click, r_click);
 }

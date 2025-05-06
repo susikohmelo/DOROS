@@ -1,3 +1,5 @@
+#pragma once
+
 #define VGA_DEFAULT_WIDTH	80
 #define VGA_DEFAULT_HEIGHT	25
 #define VGA_DEFAULT_LOCATION	0xb8000

@@ -3,6 +3,7 @@ BOOT_SRC = source_files/boot/
 KERN_SRC = source_files/kernel/
 SHEL_SRC = source_files/shell/
 DRIV_SRC = source_files/drivers/
+KLIB_SRC = source_files/klib/
 BUILD_DIR  = build/
 FLOPPY_DIR  = precompiled_os/
 BLUEPRINT_DIR = blueprints/
@@ -43,6 +44,7 @@ $(BUILD_DIR)bootloader.bin: always
 kernel: $(BUILD_DIR)kernel.bin
 
 $(BUILD_DIR)kernel.bin: always
+	cd $(KLIB_SRC) && make
 	cd $(KERN_SRC) && make
 	cd $(DRIV_SRC) && make
 	cd $(SHEL_SRC) && make
@@ -51,6 +53,7 @@ $(BUILD_DIR)kernel.bin: always
 		$(KERN_SRC)$(BUILD_DIR)*.o \
 		$(DRIV_SRC)$(BUILD_DIR)*.o \
 		$(SHEL_SRC)$(BUILD_DIR)*.o \
+		$(KLIB_SRC)$(BUILD_DIR)*.o \
 		--oformat binary
 
 # MISC ------------------------------------------------------------------------
@@ -69,6 +72,7 @@ debug:
 
 clean:
 	rm -rf $(BUILD_DIR)
+	cd $(KLIB_SRC) && make clean
 	cd $(DRIV_SRC) && make clean
 	cd $(SHEL_SRC) && make clean
 	cd $(KERN_SRC) && make clean

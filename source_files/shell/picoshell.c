@@ -1,3 +1,4 @@
+#include <klib.h>
 #include <vga_tty.h>
 #include <keyboard.h>
 #include <mouse.h>
@@ -103,6 +104,7 @@ static void write_prompt()
 }
 
 #include "commands.c" // cmd_help etc.
+#include "cmd_draw.c"
 
 static inline void invalid_command()
 {
@@ -124,6 +126,8 @@ static inline void (*get_function_ptr(uint8_t *cmd))(uint8_t*)
 		return &cmd_math;
 	if (k_memcmp(cmd, "rainbow", 7) == 0)
 		return &cmd_rainbow;
+	if (k_memcmp(cmd, "draw", 4) == 0)
+		return &cmd_draw;
 	return 0;
 }
 
@@ -310,12 +314,12 @@ void launch_picoshell()
 
 	loop:
 		g_arrowkey_down = false;
-		__asm__ __volatile__ ("hlt");
 		if (g_ready_to_execute == true)
 			execute_buffer();
 		g_arrowkey_down = false;
 		__asm__ __volatile__ ("cli"); // Disable interrupts
 		write_banner(); // Update key-info
 		__asm__ __volatile__ ("sti"); // Enable interrupts
+		__asm__ __volatile__ ("hlt");
 		goto loop;
 }

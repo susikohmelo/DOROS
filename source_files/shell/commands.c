@@ -2,43 +2,6 @@
 // any headers missing. It's intended to be like so.
 
 
-// TODO move this into libk later
-void	k_terminal_putnbr(int32_t n)
-{
-	if (n < 0)
-	{
-		n *= -1;
-		terminal_putchar('-');
-	}
-	if (n / 10 > 0)
-		k_terminal_putnbr(n / 10);
-	terminal_putchar(n % 10 + '0');
-}
-
-static inline int32_t k_atoi(const uint8_t *nptr)
-{
-	int32_t	resulting_int;
-	int8_t	sign;
-
-	resulting_int = 0;
-	sign = 1;
-	while (*nptr && (*nptr == ' ' || *nptr == '\t' || *nptr == '\r'
-			|| *nptr == '\n' || *nptr == '\v' || *nptr == '\f'))
-		++nptr;
-	if (*nptr == '-' || *nptr == '+')
-	{
-		if (*nptr == '-')
-			sign = -1;
-		++nptr;
-	}
-	while (*nptr >= '0' && *nptr <= '9')
-	{
-		resulting_int = resulting_int * 10 + *nptr - '0';
-		++nptr;
-	}
-	return (resulting_int * sign);
-}
-
 #define VGA_BUF_SIZE VGA_DEFAULT_HEIGHT * VGA_DEFAULT_WIDTH
 static uint8_t g_rainbow_stop = true;
 
@@ -216,6 +179,7 @@ Commands:\n\
 - help\n\
 - clear   - clear screen\n\
 - rainbow - epilepsy warning!\n\
+- draw    - draw on screen with your mouse\n\
 - math    - simple math operations\n\
 - ls      - list current directory\n");
 }

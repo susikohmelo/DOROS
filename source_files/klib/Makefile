@@ -3,7 +3,7 @@ BUILD_DIR  = build/
 # Assembler
 ASM = nasm
 
-INCLUDES= -I. -I../drivers/include -I../kernel -I../kernel/interrupts -I../kernel/heap -I../klib
+INCLUDES= -I. -I../drivers/include -I../kernel -I../kernel/interrupts -I../kernel/heap
 
 # C cross compiler
 CC = /usr/local/i386elfgcc/bin/i386-elf-gcc -ffreestanding -m32 -g -O2 -std=gnu99 -ggdb $(INCLUDES)
@@ -13,7 +13,8 @@ CC = /usr/local/i386elfgcc/bin/i386-elf-gcc -ffreestanding -m32 -g -O2 -std=gnu9
 .PHONY: all clean always
 
 all: always
-	$(CC) -c picoshell.c -o $(BUILD_DIR)picoshell.o
+	$(CC) -c k_putnbr.c -o $(BUILD_DIR)k_putnbr.o
+	$(CC) -c k_atoi.c -o $(BUILD_DIR)k_atoi.o
 
 always:
 	mkdir -p $(BUILD_DIR)
