@@ -18,10 +18,10 @@ Most of the source_file subfolders have READMEs with a summary of the folder's c
 ### In 32-bit protected mode
 - IDT & everything needed for interrupts (such as PIC configs & IVT)
 - PS/2 keyboard driver
+- PS/2 mouse driver
 - Heap allocation (malloc/free like functionality)
 - Basic TTY functionality (VGA text mode terminal)
 - Basic shell & commands
-- **Currently working on:** Graphical cursor controlled by mouse
 
 ## How to compile?
 
