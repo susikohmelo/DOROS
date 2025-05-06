@@ -1,5 +1,6 @@
 #include "../../kernel/interrupts/IDT.h"
 #include "../include/mouse.h"
+#include "../include/vga_tty.h"
 
 // ASM function that gets called before the real handler
 extern void	recieve_mouse_interrupt();
@@ -11,71 +12,123 @@ void set_mouse_function(void (*f)(uint32_t))
 	g_mouse_function = f;
 }
 
-void wait_for_mouse(uint8_t poll_type)
-{
-	uint32_t max_iterations = 1000000;
+uint8_t	mouse_cycle=0;     //unsigned char
+int8_t	mouse_byte[3];    //signed char
+int8_t	mouse_x=0;         //signed char
+int8_t	mouse_y=0;         //signed char
 
-	if (poll_type == 0)
-	{
-		while (--max_iterations)
-		{
-			__asm__ __volatile__ ("pause");
-			if ((ioport_in(0x64) & 1) == 1)
-				break;
-		}
+void mouse_handler()
+{
+  switch(mouse_cycle)
+  {
+    case 0:
+      mouse_byte[0]=ioport_in(0x60);
+      mouse_cycle++;
+      break;
+    case 1:
+      mouse_byte[1]=ioport_in(0x60);
+      mouse_cycle++;
+      break;
+    case 2:
+      mouse_byte[2]=ioport_in(0x60);
+      mouse_x=mouse_byte[1];
+      mouse_y=mouse_byte[2];
+      mouse_cycle=0;
+      break;
+  }
+}
+
+
+
+
+
+
+inline void mouse_wait(uint8_t a_type) //unsigned char
+{
+	 int32_t _time_out=100000; //unsigned int
+	  if(a_type==0)
+	  {
+	    while(_time_out--) //Data
+	    {
+	      if((ioport_in(0x64) & 1)==1)
+	      {
+	        return;
+	      }
+	    }
+	    return;
+	  }
+	  else
+	  {
+	    while(_time_out--) //Signal
+	    {
+	      if((ioport_in(0x64) & 2)==0)
+	      {
+	        return;
+	      }
+	    }
+	    return;
+	  }
 	}
-	else
+
+inline void mouse_write(uint8_t a_write) //unsigned char
 	{
-		while (--max_iterations)
-		{
-			__asm__ __volatile__ ("pause");
-			if ((ioport_in(0x64) & 2) == 0)
-				break;
-		}
-	}
-	return;
+	  //Wait to be able to send a command
+	  mouse_wait(1);
+	  //Tell the mouse we are sending a command
+	  ioport_out(0x64, 0xD4);
+	  //Wait for the final part
+	  mouse_wait(1);
+	  //Finally write
+	  ioport_out(0x60, a_write);
 }
 
-
-static void write_to_mouse(uint8_t data)
+uint8_t mouse_read()
 {
-	wait_for_mouse(1);
-	ioport_out(0x64, 0xD4); // Tell the port we wanna talk to the mouse
-	
-	wait_for_mouse(1);
-	ioport_out(0x60, data); // Give our boy the good news.
+  //Get's response from mouse
+  mouse_wait(0);
+  return ioport_in(0x60);
 }
 
-static uint8_t read_from_mouse()
+
+void install_mouse()
 {
-	wait_for_mouse(0);
-	return (ioport_in(0x60));
+   mouse_wait(1);
+   ioport_out(0x64, 0xA8);
+
+   mouse_wait(1);
+	ioport_out(0x64, 0x20);
+
+	uint8_t status_byte;
+	mouse_wait(0);
+	status_byte = (ioport_in(0x60) | 2);
+
+
+	mouse_wait(1);
+	ioport_out(0x64, 0x60);
+
+
+	mouse_wait(1);
+	ioport_out(0x60, status_byte);
+
+
+	mouse_write(0xF6);
+	mouse_read();
+
+	mouse_write(0xF4);
+	mouse_read();
+
 }
+
+
+
+
+
+
+
 
 void init_mouse()
 {
-	uint8_t compaq;
-	
-	wait_for_mouse(1);
-	ioport_out(0x64, 0xA8); // Enable AUX input
-
-	// Get compaq status
-	wait_for_mouse(1);
-	ioport_out(0x64, 0x20);
-
-	wait_for_mouse(0);
-	compaq = (ioport_in(0x60) | 2); // Enable bit 1 (IRQ12 enable)
-	// compaq &= 0b11011111; // Clear bit 5 (mouse clock)
-	wait_for_mouse(1);
-	ioport_out(0x64, 60);
-	wait_for_mouse(1);
-	ioport_out(0x60, compaq);
-
-	write_to_mouse(0xF6);
-	read_from_mouse();
-
-	write_to_mouse(0xF4);
-	read_from_mouse();
+	install_mouse();
 
 	// The IDT is just an array of entries.
 	struct IDT_entry *IDT = get_IDT();
@@ -103,6 +156,7 @@ void init_mouse()
 
 	// We also need to open up IRQ 2 on PIC1
 	mask = ioport_in(PIC1_DATA_PORT); // Get current mask
+	//mask &= 0xBF;
 	mask &= 0x01;
 	ioport_out(PIC1_DATA_PORT, mask);
 }
@@ -110,11 +164,15 @@ void init_mouse()
 // This gets called on mouse interrupts
 void handle_mouse_interrupt()
 {
+	terminal_putstring("WHAH");
 	// Reset command - yank that interrupt off the queue
+	ioport_in(0x60);
 	ioport_out(PIC2_CMD_PORT, 0x20);
+	ioport_out(PIC1_CMD_PORT, 0x20);
+	return;
 
 	// Yoink the status
-	uint32_t status = ioport_in(MOUSE_STATUS_PORT);
+	uint8_t status = ioport_in(MOUSE_STATUS_PORT);
 
 	if (status & 0x1) // If there is a new input to be had
 	{
