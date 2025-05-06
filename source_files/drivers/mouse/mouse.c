@@ -1,6 +1,6 @@
-#include "../../kernel/interrupts/IDT.h"
-#include "../include/mouse.h"
-#include "../include/vga_tty.h"
+#include <IDT.h>
+#include <mouse.h>
+#include <vga_tty.h>
 
 // ASM function that gets called before the real handler
 extern void	recieve_mouse_interrupt();

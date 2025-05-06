@@ -1,6 +1,6 @@
-#include "../drivers/include/vga_tty.h"
-#include "../drivers/include/keyboard.h"
-#include "../kernel/heap/heap.h"
+#include <vga_tty.h>
+#include <keyboard.h>
+#include <heap.h>
 #include <stdint.h>
 #include <stdbool.h>
 

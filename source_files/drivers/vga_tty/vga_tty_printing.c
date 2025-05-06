@@ -2,8 +2,8 @@
 // They work in standalone environments such as this one.
 #include <stdint.h>
 
-#include "../include/vga_tty.h"
-#include "../../kernel/heap/heap.h"
+#include <vga_tty.h>
+#include <heap.h>
 
 // Please note! The cursor is not visually shown in any way.
 // Any visual effects of the cursor will have to be done by the caller.

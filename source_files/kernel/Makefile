@@ -3,8 +3,10 @@ BUILD_DIR  = build/
 # Assembler
 ASM = nasm
 
+INCLUDES= -I../drivers/include -I../shell -I./interrupts -I./heap
+
 # C cross compiler
-CC = i386-elf-gcc -ffreestanding -m32 -g -O2 -std=gnu99  -ggdb
+CC = /usr/local/i386elfgcc/bin/i386-elf-gcc -ffreestanding -m32 -g -O2 -std=gnu99 -ggdb $(INCLUDES)
 # Linker used
 # LD = i386-elf-ld
 

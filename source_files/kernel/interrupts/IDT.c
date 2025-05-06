@@ -1,5 +1,5 @@
-#include "IDT.h"
-#include "../../drivers/include/vga_tty.h"
+#include <IDT.h>
+#include <vga_tty.h>
 
 #define ICW1_INIT	0x10 // For init in cascade mode
 #define ICW1_ICW4	0x01 // Tells the pic we have ICW4

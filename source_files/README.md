@@ -25,11 +25,12 @@ boot/
 kernel/
 - kernel's main()
 - heap allocation
-- IDT
+- IDT and PIC configuration
 
 drivers/
-- keyboard driver
-- terminal driver
+- terminal
+- keyboard
+- mouse
 
 shell/
 - picoshell

@@ -1,4 +1,4 @@
-#include "../drivers/include/vga_tty.h"
+#include <vga_tty.h>
 #include <stdint.h>
 
 // Each row is 80 wide even if it doesn't look like it

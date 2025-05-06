@@ -1,5 +1,5 @@
-#include "../../kernel/interrupts/IDT.h"
-#include "../include/keyboard.h"
+#include <IDT.h>
+#include <keyboard.h>
 
 // ASM function that gets called before the real handler
 extern void	recieve_keyboard_interrupt();

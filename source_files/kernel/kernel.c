@@ -10,14 +10,14 @@
  *
 */
 
-#include "../drivers/include/vga_tty.h"
-#include "../drivers/include/keyboard.h"
-#include "../drivers/include/mouse.h"
-#include "interrupts/interrupt_utils.h"
-#include "interrupts/IDT.h"
-#include "heap/heap.h"
 #include <stdbool.h>
 #include <stdint.h>
+#include <vga_tty.h>
+#include <keyboard.h>
+#include <mouse.h>
+#include <interrupt_utils.h>
+#include <IDT.h>
+#include <heap.h>
 
 
 // Don't bother making a header just for this

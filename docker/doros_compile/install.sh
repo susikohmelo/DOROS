@@ -55,10 +55,11 @@ sudo make all-gcc
 sudo make all-target-libgcc
 sudo make install-gcc
 sudo make install-target-libgcc
-ls /usr/local/i386elfgcc/bin
-export PATH="$PATH:/usr/local/i386elfgcc/bin"
 ls "/usr/local/i386elfgcc/bin"
-alias i386-elf-gcc="/usr/local/i386elfgcc/bin/i386-elf-c++"
+export PATH="$PATH:/usr/local/i386elfgcc/bin"
+echo 'PATH="$PATH:/usr/local/i386elfgcc/bin"' >> ~/.bashrc
+# echo 'alias i386-elf-gcc="/usr/local/i386elfgcc/bin/i386-elf-gcc"'
+source ~/.bashrc
 
 # After the installation is complete we will just run the makefile
 cd /doros

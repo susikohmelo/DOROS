@@ -1,4 +1,4 @@
-#include "heap.h"
+#include <heap.h>
 
 uint8_t *g_heap_bitmap = (uint8_t*) HEAP_BITMAP_POS;
 

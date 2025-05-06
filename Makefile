@@ -11,9 +11,9 @@ BLUEPRINT_DIR = blueprints/
 ASM = nasm
 
 # C cross compiler
-CC = i386-elf-gcc -ffreestanding -m32 -g -O2 -std=gnu99  -ggdb
+CC = /usr/local/i386elfgcc/bin/i386-elf-gcc -ffreestanding -m32 -g -O2 -std=gnu99 -ggdb
 # Linker used
-LD = i386-elf-ld
+LD = /usr/local/i386elfgcc/bin/i386-elf-ld
 
 .PHONY: all floppy_img kernel bootloader clean always blueprints_fat docker
 
