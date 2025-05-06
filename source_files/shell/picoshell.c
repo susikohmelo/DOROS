@@ -1,5 +1,6 @@
 #include <vga_tty.h>
 #include <keyboard.h>
+#include <mouse.h>
 #include <heap.h>
 #include <stdint.h>
 #include <stdbool.h>
