@@ -67,20 +67,21 @@ static inline void write_color_banner()
 	terminal_putstring("You may draw over this message.");
 }
 
-void store_new_prev_character()
+static void store_new_prev_character(bool wipe_chardata)
 {
 	g_prev_pos[0] = (uint8_t) g_mouse_x;
 	g_prev_pos[1] = (uint8_t) g_mouse_y;
 	g_prev_char = ((uint16_t*) VGA_DEFAULT_LOCATION)[VGA_DEFAULT_WIDTH
 		* g_prev_pos[1] + g_prev_pos[0]];
+	if (wipe_chardata)
+		g_prev_char = g_prev_char & 0xFF00;
 }
 
 static inline void show_mouse_on_screen()
 {
 	((uint16_t*) VGA_DEFAULT_LOCATION)[VGA_DEFAULT_WIDTH
 		* g_prev_pos[1] + g_prev_pos[0]] = g_prev_char;
-	
-	store_new_prev_character();
+	store_new_prev_character(0);
 	
 	// Put new cursor
 	uint8_t new_c = g_prev_char >> 8; // Color of background char
@@ -141,24 +142,27 @@ static void cmd_draw(uint8_t *args)
 	while (g_exit_draw == false)
 	{
 		__asm__ __volatile__ ("HLT");
-
-		if (g_r_down)
+		__asm__ __volatile__ ("CLI");
+		if (g_r_down && (uint8_t)g_mouse_y != 0)
 		{
 			flood_fill(g_mouse_x, g_mouse_y);
-			store_new_prev_character();
+			store_new_prev_character(0);
 		}
 		if (g_l_down)
 		{
 			if ((uint8_t) g_mouse_y == 0)
 			{
 				choose_color();
-				show_mouse_on_screen();
-				continue;
+				goto END;
 			}
+			show_mouse_on_screen();
 			terminal_putblock_at(' ', g_draw_color,
 				(uint8_t) g_mouse_x, (uint8_t) g_mouse_y);
+			store_new_prev_character(1);
 		}
-		show_mouse_on_screen();
+		END:
+			show_mouse_on_screen();
+			__asm__ __volatile__ ("STI");
 	}
 
 	// Restore previous functionality
