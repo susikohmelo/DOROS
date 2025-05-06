@@ -6,9 +6,35 @@
 # define MOUSE_MAX_X VGA_DEFAULT_WIDTH - 1
 # define MOUSE_MAX_Y VGA_DEFAULT_HEIGHT - 1
 
+# define CUR_B1 0xC0
+# define CUR_B2 0xC1
+# define CUR_B3 0xC2
+# define CUR_B4 0xC3
+
 # define MOUSE_SENS 0.1
 # define MOUSE_X_SENS MOUSE_SENS
 # define MOUSE_Y_SENS MOUSE_SENS / 3.2 // To account for chars not being square
+
+static uint8_t g_cursor_bits[16] =
+{
+	0b01000000,
+	0b01100000,
+	0b01110000,
+	0b01110000,
+	0b01111000,
+	0b01111100,
+	0b01111100,
+	0b01111110,
+	0b01111111,
+	0b01111100,
+	0b01011110,
+	0b00001110,
+	0b00001110,
+	0b00000100,
+	0b00000000,
+	0b00000000
+};
+									   
 
 static uint16_t	g_prev_char;
 static uint8_t	g_prev_pos[2];
@@ -83,11 +109,14 @@ static inline void show_mouse_on_screen()
 	((uint16_t*) VGA_DEFAULT_LOCATION)[VGA_DEFAULT_WIDTH
 		* g_prev_pos[1] + g_prev_pos[0]] = g_prev_char;
 	store_new_prev_character(0);
-	
+
+	k_memcpy(g_cursor_bits, g_fonts + CUR_B1 * 16, 16); 
+	set_fonts(g_fonts);
+
 	// Put new cursor
 	uint8_t new_c = g_prev_char >> 8; // Color of background char
 	new_c ^= 0x0F;
-	terminal_putblock_at('o', new_c,
+	terminal_putblock_at(CUR_B1, new_c,
 			(uint8_t) g_mouse_x, (uint8_t) g_mouse_y);
 }
 
@@ -162,7 +191,7 @@ static void cmd_draw(uint8_t *args)
 				goto END;
 			}
 			show_mouse_on_screen();
-			terminal_putblock_at(' ', g_draw_color,
+			terminal_putblock_at(0xC0, g_draw_color,
 				(uint8_t) g_mouse_x, (uint8_t) g_mouse_y);
 			store_new_prev_character(1);
 		}
