@@ -58,7 +58,7 @@ always:
 	mkdir -p $(BUILD_DIR)
 
 docker:
-	cd docker && sudo docker compose up --build
+	cd docker && docker compose up --build
 
 run:
 	# qemu-system-i386 -fda $(FLOPPY_DIR)floppy_DOROS.img

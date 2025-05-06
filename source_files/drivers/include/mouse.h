@@ -8,4 +8,4 @@ void handle_mouse_interrupt();
 
 // The function that gets called on keypress.
 // This way we don't have to do any polling.
-void set_mouse_function(void (*f)(uint32_t));
+void set_mouse_function(void (*f)(int16_t, int16_t, bool, bool));

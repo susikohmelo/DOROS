@@ -1,134 +1,92 @@
 #include <IDT.h>
 #include <mouse.h>
 #include <vga_tty.h>
+#include <stdbool.h>
 
 // ASM function that gets called before the real handler
 extern void	recieve_mouse_interrupt();
 
-void (*g_mouse_function)(uint32_t) = 0;
+void (*g_mouse_function)(int16_t, int16_t, bool, bool) = 0;
 
-void set_mouse_function(void (*f)(uint32_t))
+void set_mouse_function(void (*f)(int16_t, in16_t, bool, bool))
 {
 	g_mouse_function = f;
 }
 
-uint8_t	mouse_cycle=0;     //unsigned char
-int8_t	mouse_byte[3];    //signed char
-int8_t	mouse_x=0;         //signed char
-int8_t	mouse_y=0;         //signed char
+/*
 
 void mouse_handler()
 {
-  switch(mouse_cycle)
-  {
-    case 0:
-      mouse_byte[0]=ioport_in(0x60);
-      mouse_cycle++;
-      break;
-    case 1:
-      mouse_byte[1]=ioport_in(0x60);
-      mouse_cycle++;
-      break;
-    case 2:
-      mouse_byte[2]=ioport_in(0x60);
-      mouse_x=mouse_byte[1];
-      mouse_y=mouse_byte[2];
-      mouse_cycle=0;
-      break;
-  }
-}
+}*/
 
-
-
-
-
-
-inline void mouse_wait(uint8_t a_type) //unsigned char
+static void wait_for_mouse(uint8_t input_type)
 {
-	 int32_t _time_out=100000; //unsigned int
-	  if(a_type==0)
-	  {
-	    while(_time_out--) //Data
-	    {
-	      if((ioport_in(0x64) & 1)==1)
-	      {
-	        return;
-	      }
-	    }
-	    return;
-	  }
-	  else
-	  {
-	    while(_time_out--) //Signal
-	    {
-	      if((ioport_in(0x64) & 2)==0)
-	      {
-	        return;
-	      }
-	    }
-	    return;
-	  }
-	}
-
-inline void mouse_write(uint8_t a_write) //unsigned char
+	uint32_t	time_out=100000;
+	if(input_type==0)
 	{
-	  //Wait to be able to send a command
-	  mouse_wait(1);
-	  //Tell the mouse we are sending a command
-	  ioport_out(0x64, 0xD4);
-	  //Wait for the final part
-	  mouse_wait(1);
-	  //Finally write
-	  ioport_out(0x60, a_write);
+		while(--time_out) //Data
+			if((ioport_in(0x64) & 1)==1)
+				return;
+	}
+	else
+	{
+		while(--time_out) //Signal
+			if((ioport_in(0x64) & 2)==0)
+				return;
+	}
+	return;
 }
 
-uint8_t mouse_read()
+static void write_to_mouse(uint8_t a_write) //unsigned char
 {
-  //Get's response from mouse
-  mouse_wait(0);
-  return ioport_in(0x60);
+	wait_for_mouse(1);		// Wait to be able tosend commands
+
+	ioport_out(0x64, 0xD4);	// Tell the PS/2 that we want to talk to mouse
+	wait_for_mouse(1);		// Wait for message-received OK
+
+	// Tell our boy the good news.
+	ioport_out(0x60, a_write);
 }
 
-
-void install_mouse()
+// Get ACK(nowledgement) from mouse. Use this for 0xFA!
+static uint8_t read_from_mouse()
 {
-   mouse_wait(1);
-   ioport_out(0x64, 0xA8);
-
-   mouse_wait(1);
-	ioport_out(0x64, 0x20);
-
-	uint8_t status_byte;
-	mouse_wait(0);
-	status_byte = (ioport_in(0x60) | 2);
-
-
-	mouse_wait(1);
-	ioport_out(0x64, 0x60);
-
-
-	mouse_wait(1);
-	ioport_out(0x60, status_byte);
-
-
-	mouse_write(0xF6);
-	mouse_read();
-
-	mouse_write(0xF4);
-	mouse_read();
-
+	wait_for_mouse(0);
+	return ioport_in(0x60);
 }
 
 
+static inline void setup_mouse_for_communication()
+{
+	// wait_for_mouse is ussed to wait until it is ready to receive commands
+	// read_from_mouse is for the 0xFA ACKnowledgements.
 
+	wait_for_mouse(1);
+	ioport_out(0x64, 0xA8); // Set AUX to send IRQ12
+	
+	wait_for_mouse(1);
+	ioport_out(0x64, 0x20); // Get compaq byte
+	
+	wait_for_mouse(0);
+	uint8_t compaq_byte = (ioport_in(0x60) | 2); // Turn on bit 1
+	
+	wait_for_mouse(1);
+	ioport_out(0x64, 0x60);	// Tell PS/2 we are about to set the config
+	
+	wait_for_mouse(1);
+	ioport_out(0x60, compaq_byte); // Send our new compaq config
 
-
-
+	write_to_mouse(0xF6);	// Tell mouse to use default settings
+	read_from_mouse();
+	
+	write_to_mouse(0xF4);	// Enable packets
+	read_from_mouse();
+}
 
 
 void init_mouse()
 {
-	install_mouse();
+	setup_mouse_for_communication();
 
 	// The IDT is just an array of entries.
 	struct IDT_entry *IDT = get_IDT();
@@ -164,21 +122,49 @@ void init_mouse()
 // This gets called on mouse interrupts
 void handle_mouse_interrupt()
 {
-	terminal_putstring("WHAH");
-	// Reset command - yank that interrupt off the queue
-	ioport_in(0x60);
-	ioport_out(PIC2_CMD_PORT, 0x20);
-	ioport_out(PIC1_CMD_PORT, 0x20);
-	return;
+	static uint8_t	mouse_cycle=0;	// How many bytes are received so far
+	static uint8_t	mouse_byte1;
+	//static int8_t	mouse_byte[3];	// Mouse sends us a 3 bytes in it
+					// This happens in separate IRQs
+	static uint8_t	u_mouse_x = 0;	// Relative change in mouse_x
+	static uint8_t	u_mouse_y = 0;	// Relative change in mouse_y
+	static uint8_t	mouse_x_sign = 0;
+	static uint8_t	mouse_y_sign = 0;
 
-	// Yoink the status
-	uint8_t status = ioport_in(MOUSE_STATUS_PORT);
-
-	if (status & 0x1) // If there is a new input to be had
+	switch(mouse_cycle)
 	{
-		uint32_t x = ioport_in(MOUSE_DATA_PORT);
-		if (g_mouse_function == 0)
-			return ;
-		g_mouse_function(x);
+		case 0:
+			mouse_byte1 = ioport_in(0x60);
+			mouse_x_sign = (mouse_byte1 & 0b00010000) != 0;
+			mouse_y_sign = (mouse_byte1 & 0b00100000) != 0;
+			break;
+		case 1:
+			u_mouse_x = ioport_in(0x60);
+			break;
+		case 2:
+			u_mouse_y = ioport_in(0x60);
+		break;
 	}
+	mouse_cycle = (mouse_cycle + 1) % 3; // Limit range to 0-2
+
+	if (mouse_cycle != 0) // We still have more packets to parse!
+		return ;
+
+	// Done reading the whole mouse packet, reset both PICs.
+	ioport_out(PIC1_CMD_PORT, 0x20);
+	ioport_out(PIC2_CMD_PORT, 0x20);
+
+	if (g_mouse_function == 0)
+		return ;
+	bool	l_click = (mouse_byte1 & 0b00000001) != 0;
+	bool	r_click = (mouse_byte1 & 0b00000010) != 0;
+
+	int16_t	mouse_x = (u_mouse_x | (mouse_x_sign << 15));
+	int16_t	mouse_y = (u_mouse_y | (mouse_y_sign << 15));
+
+	terminal_putchar(mouse_x + '5');
+	terminal_putchar(' ');
+	terminal_putchar(mouse_y + '5');
+	terminal_putchar('\n');
+	g_mouse_function(mouse_x, mouse_y, l_click, r_click);
 }

@@ -27,6 +27,7 @@ sudo apt-get -y install libgmp3-dev
 sudo apt-get -y install libmpc-dev
 sudo apt-get -y install libmpfr-dev
 sudo apt-get -y install texinfo
+sudo apt-get -y instal dosfstools
 
 sudo apt-get -y install curl
 sudo apt-get -y update; apt-get -y install curl
