@@ -34,5 +34,6 @@ Why docker? Compiling systems is pretty hard as you're building code for a diffe
 
 ## How to run?
 Install `QEMU` and run the OS with `make run`.<br>
-Alternatively you can try it on real hardware! Rename the extension of the `precompiled_OS/floppy_DOROS.img` to .iso and burn it onto a USB stick to boot off of. Indeed, floppy images convert directly to ISO images.
+Alternatively you can try it on real hardware! Burn the `precompiled_OS/floppy_DOROS.img` onto a USB stick and
+select it in your boot menu. Make sure that BIOS is enabled and not UEFI!
 

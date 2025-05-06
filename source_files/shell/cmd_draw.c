@@ -13,13 +13,13 @@
 static uint16_t	g_prev_char;
 static uint8_t	g_prev_pos[2];
 
-static int8_t	g_draw_color;
+static uint8_t	g_draw_color;
 static float	g_mouse_x;
 static float	g_mouse_y;
-static bool		g_l_down;
-static bool		g_r_down;
+static bool	g_l_down;
+static bool	g_r_down;
 
-static bool		g_exit_draw = false;
+static bool	g_exit_draw = false;
 
 void exit_draw(uint8_t key)
 {
@@ -63,31 +63,48 @@ static inline void write_color_banner()
 	terminal_setcolor(og_color);
 	terminal_putchar('\n');
 	terminal_putstring("Press ESC to quit. Click above colors to choose one\n");
+	terminal_putstring("Left click to draw - Right click to flood fill\n");
 	terminal_putstring("You may draw over this message.");
 }
 
 static inline void show_mouse_on_screen()
 {
-		((uint16_t*) VGA_DEFAULT_LOCATION)[VGA_DEFAULT_WIDTH
-			* g_prev_pos[1] + g_prev_pos[0]] = g_prev_char;
+	((uint16_t*) VGA_DEFAULT_LOCATION)[VGA_DEFAULT_WIDTH
+		* g_prev_pos[1] + g_prev_pos[0]] = g_prev_char;
+	
+	// Store new character
+	g_prev_pos[0] = (uint8_t) g_mouse_x;
+	g_prev_pos[1] = (uint8_t) g_mouse_y;
+	g_prev_char = ((uint16_t*) VGA_DEFAULT_LOCATION)[VGA_DEFAULT_WIDTH
+		* g_prev_pos[1] + g_prev_pos[0]];
+	
+	// Put new cursor
+	uint8_t new_c = g_prev_char >> 8; // Color of background char
+	new_c ^= 0x0F;
+	terminal_putblock_at('o', new_c,
+			(uint8_t) g_mouse_x, (uint8_t) g_mouse_y);
+}
 
-		// Store new character
-		g_prev_pos[0] = (uint8_t) g_mouse_x;
-		g_prev_pos[1] = (uint8_t) g_mouse_y;
-		g_prev_char = ((uint16_t*) VGA_DEFAULT_LOCATION)[VGA_DEFAULT_WIDTH
-			* g_prev_pos[1] + g_prev_pos[0]];
+static void flood_fill(uint8_t x, uint8_t y)
+{
+	if (y == 0 || x >= VGA_DEFAULT_WIDTH || y >= VGA_DEFAULT_HEIGHT)
+		return ;
 
-		// Put new cursor
-		uint8_t new_c = g_prev_char >> 8; // Color of background char
-		new_c ^= 0x0F;
-		terminal_putblock_at('o', new_c,
-				(uint8_t) g_mouse_x, (uint8_t) g_mouse_y);
+	uint8_t cur_clr = (((uint16_t*) VGA_DEFAULT_LOCATION)[VGA_DEFAULT_WIDTH
+		* y + x]) >> 8;
+	if (cur_clr == g_draw_color)
+		return ;
+	terminal_putblock_at(' ', g_draw_color, x, y);
+	flood_fill(x + 1, y);
+	flood_fill(x - 1, y);
+	flood_fill(x, y + 1);
+	flood_fill(x, y - 1);
 }
 
 static inline void choose_color()
 {
 	uint8_t t_clr = (((uint8_t) g_mouse_x) / 5);
-    g_draw_color = ((t_clr << 4) & 0xF0) | (t_clr & 0x0F);
+	g_draw_color = ((t_clr << 4) & 0xF0) | (t_clr & 0x0F);
 }
 
 static inline void init_globals()
@@ -120,6 +137,13 @@ static void cmd_draw(uint8_t *args)
 	while (g_exit_draw == false)
 	{
 		__asm__ __volatile__ ("HLT");
+
+		if (g_r_down)
+		{
+			flood_fill(g_mouse_x, g_mouse_y);
+			terminal_putblock_at(' ', g_draw_color,
+				(uint8_t) g_mouse_x, (uint8_t) g_mouse_y);
+		}
 		if (g_l_down)
 		{
 			if ((uint8_t) g_mouse_y == 0)
