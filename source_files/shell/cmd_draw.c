@@ -67,16 +67,20 @@ static inline void write_color_banner()
 	terminal_putstring("You may draw over this message.");
 }
 
+void store_new_prev_character()
+{
+	g_prev_pos[0] = (uint8_t) g_mouse_x;
+	g_prev_pos[1] = (uint8_t) g_mouse_y;
+	g_prev_char = ((uint16_t*) VGA_DEFAULT_LOCATION)[VGA_DEFAULT_WIDTH
+		* g_prev_pos[1] + g_prev_pos[0]];
+}
+
 static inline void show_mouse_on_screen()
 {
 	((uint16_t*) VGA_DEFAULT_LOCATION)[VGA_DEFAULT_WIDTH
 		* g_prev_pos[1] + g_prev_pos[0]] = g_prev_char;
 	
-	// Store new character
-	g_prev_pos[0] = (uint8_t) g_mouse_x;
-	g_prev_pos[1] = (uint8_t) g_mouse_y;
-	g_prev_char = ((uint16_t*) VGA_DEFAULT_LOCATION)[VGA_DEFAULT_WIDTH
-		* g_prev_pos[1] + g_prev_pos[0]];
+	store_new_prev_character();
 	
 	// Put new cursor
 	uint8_t new_c = g_prev_char >> 8; // Color of background char
@@ -141,8 +145,7 @@ static void cmd_draw(uint8_t *args)
 		if (g_r_down)
 		{
 			flood_fill(g_mouse_x, g_mouse_y);
-			terminal_putblock_at(' ', g_draw_color,
-				(uint8_t) g_mouse_x, (uint8_t) g_mouse_y);
+			store_new_prev_character();
 		}
 		if (g_l_down)
 		{
