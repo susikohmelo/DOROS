@@ -12,7 +12,7 @@
 # define CUR_B3 0xC2
 # define CUR_B4 0xC3
 
-# define MOUSE_SENS 0.1
+# define MOUSE_SENS 0.07
 # define MOUSE_X_SENS MOUSE_SENS
 # define MOUSE_Y_SENS MOUSE_SENS / 3.2 // To account for chars not being square
 
