@@ -189,6 +189,7 @@ void terminal_puterror(const unsigned char *c)
 
 void terminal_init(void)
 {
+	disable_blink();
 	g_terminal_buffer = (uint16_t*) VGA_DEFAULT_LOCATION;
 	g_terminal_color = (uint8_t) VGA_DEFAULT_COLOR;
 	g_terminal_cursor_x = 0;

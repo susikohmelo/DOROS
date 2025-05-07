@@ -42,6 +42,7 @@ const uint8_t get_cursor_y(void);
 extern void enable_cursor(void);
 extern void disable_cursor(void);
 extern void move_cursor(uint8_t x, uint8_t y);
+extern void disable_blink(); // Turn off VGA blinking bit
 
 
 // Clear screen and set variables up. Not using this is undefined behaviour

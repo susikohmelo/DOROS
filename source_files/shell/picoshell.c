@@ -11,7 +11,7 @@
 #define SHELL_PROMPT_FG_COLOR VGA_COLOR_BLACK
 #define SHELL_PROMPT_BG_COLOR VGA_COLOR_GREEN
 #define SHELL_BAN_FG_COLOR VGA_COLOR_BLACK
-#define SHELL_BAN_BG_COLOR VGA_COLOR_LIGHT_GRAY
+#define SHELL_BAN_BG_COLOR VGA_COLOR_WHITE
 
 uint8_t	g_ready_to_execute = false;
 int8_t	g_keybuffer[SHELL_BUF_SIZE + 1]; // + 1 so it's always null terminated
@@ -295,8 +295,7 @@ void key_catcher(uint8_t keycode) // Async function called on keyboard interrupt
 static void launch_message()
 {
 	uint8_t	og_color = get_color(); // Terminal color
-	terminal_setcolor(vga_block_color(VGA_COLOR_LIGHT_GRAY,
-					VGA_COLOR_RED));
+	terminal_setcolor(vga_block_color(VGA_COLOR_WHITE, VGA_COLOR_RED));
 	terminal_putstring("\
 You are now in PICOSHELL - Type 'help' for a list of commands.                  ");
 	terminal_setcolor(og_color);

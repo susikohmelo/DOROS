@@ -92,7 +92,7 @@ static inline void write_color_banner()
 	}
 
 	terminal_setcolor(og_color);
-	terminal_putchar('\n');
+	terminal_putchar('\n'); terminal_putchar('\n');
 	terminal_putstring("Press ESC to quit. Click above colors to choose one\n");
 	terminal_putstring("Left click to draw - Right click to flood fill\n");
 	terminal_putstring("You may draw over this message.");
@@ -224,10 +224,11 @@ static void flood_fill(uint8_t x, uint8_t y, uint8_t t_clr, bool original)
 	if (y == 0 || x >= VGA_DEFAULT_WIDTH || y >= VGA_DEFAULT_HEIGHT)
 		return ;
 
-	uint8_t cur_clr = (((uint16_t*) VGA_DEFAULT_LOCATION) \
-			[VGA_DEFAULT_WIDTH * y + x]) >> 8;
-	if (!original && (cur_clr == g_draw_color
-			|| (cur_clr != t_clr && cur_clr != g_draw_color)))
+	t_clr &= 0xF0; // We only care about the background color here
+	uint8_t cur_clr = ((((uint16_t*) VGA_DEFAULT_LOCATION) \
+			[VGA_DEFAULT_WIDTH * y + x]) >> 8) & 0xF0;
+	if (!original && (cur_clr == (g_draw_color & 0xF0)
+			|| (cur_clr != t_clr && cur_clr != (g_draw_color & 0xF0))))
 		return ;
 	terminal_putblock_at(' ', g_draw_color, x, y);
 	flood_fill(x + 1, y, t_clr, 0);
@@ -242,10 +243,26 @@ static inline void choose_color()
 	g_draw_color = ((t_clr << 4) & 0xF0) | (t_clr & 0x0F);
 }
 
+static inline void print_block_bits()
+{
+	uint8_t og_color = get_color();
+	terminal_setcolor(0x0F);
+	set_cursor_x(0);
+	set_cursor_y(1);
+	terminal_putstring("clr | char bits: ");
+	terminal_setcolor(0x0A);
+	k_terminal_putbits((uint8_t) (g_prev_char1 >> 8));
+	terminal_setcolor(0x0F);
+	terminal_putstring(" | ");
+	terminal_setcolor(0x0B);
+	k_terminal_putbits((uint8_t) (g_prev_char1));
+	terminal_setcolor(og_color); 
+}
+
 static inline void init_globals()
 {
 	g_exit_draw = 0;
-	g_prev_char1 = ' ';
+	g_prev_char1 = 0;
 	g_draw_color = 0xFF;
 	g_mouse_x = 0;
 	g_mouse_y = 0;
@@ -292,6 +309,7 @@ static void cmd_draw(uint8_t *args)
 		}
 		END:
 			show_mouse_on_screen();
+			print_block_bits();
 			__asm__ __volatile__ ("STI");
 	}
 
