@@ -1,6 +1,7 @@
 // This C file is directly included inside picoshell, so don't worry about
 // any headers missing. It's intended to be like so.
 
+#include "font"
 #include <klib.h>
 
 # define MOUSE_MAX_X VGA_DEFAULT_WIDTH - 1
@@ -154,14 +155,12 @@ static inline void init_globals()
 	g_r_down = false;
 	g_prev_pos[0] = 0;
 	g_prev_pos[1] = 0;
-	get_fonts(g_fonts);
+	//get_fonts(g_fonts);
+	g_fonts = g_font_bitmap;
 }
 
 static void cmd_draw(uint8_t *args)
 {
-	g_fonts = kmalloc(4096);
-	if (!g_fonts)
-		return;
 	__asm__ __volatile__ ("cli");
 
 	set_keyboard_function(&exit_draw);
@@ -206,5 +205,4 @@ static void cmd_draw(uint8_t *args)
 	set_ignore_rows(0);
 	set_mouse_function(0);
 	set_keyboard_function(&key_catcher);
-	kfree(g_fonts);
 }
