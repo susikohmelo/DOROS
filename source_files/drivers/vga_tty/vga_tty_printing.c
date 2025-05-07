@@ -63,6 +63,8 @@ void terminal_setcolor(uint8_t color)
 
 void terminal_putblock_at(unsigned char c, uint8_t color, uint8_t x, uint8_t y)
 {
+	if (x >= VGA_DEFAULT_WIDTH || y >= VGA_DEFAULT_HEIGHT)
+		return;
 	g_terminal_buffer[VGA_DEFAULT_WIDTH * y + x] = vga_block(c, color);
 }
 

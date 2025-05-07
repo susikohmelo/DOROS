@@ -61,3 +61,7 @@ void terminal_removechar();
 
 // Put a block (character + color) at position but does not affect cursor
 void terminal_putblock_at(unsigned char c, uint8_t color, uint8_t x, uint8_t y);
+
+// VGA font get/setters
+extern void get_fonts(uint8_t *ptr);
+extern void set_fonts(uint8_t *ptr);

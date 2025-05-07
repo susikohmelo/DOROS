@@ -19,6 +19,7 @@ all: always
 	$(ASM) -f elf keyboard/receive_keyboard_interrupts.asm -o $(BUILD_DIR)receive_keyboard_interrupts.o
 	$(ASM) -f elf mouse/receive_mouse_interrupts.asm -o $(BUILD_DIR)receive_mouse_interrupts.o
 	$(ASM) -f elf vga_tty/vga_tty_cursor.asm -o $(BUILD_DIR)vga_tty_cursor.o
+	$(ASM) -f elf vga_tty/vga_tty_fonts.asm -o $(BUILD_DIR)vga_tty_fonts.o
 
 always:
 	mkdir -p $(BUILD_DIR)
