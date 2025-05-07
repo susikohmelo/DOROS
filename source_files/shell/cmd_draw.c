@@ -277,6 +277,7 @@ static void cmd_draw(uint8_t *args)
 {
 	__asm__ __volatile__ ("cli");
 
+	uint8_t og_color = get_color();
 	set_keyboard_function(&exit_draw);
 	set_mouse_function(&mouse_catcher);
 	set_ignore_rows(0);
@@ -314,9 +315,10 @@ static void cmd_draw(uint8_t *args)
 	}
 
 	// Restore previous functionality
-	terminal_clear_screen();
 	enable_cursor();
 	set_ignore_rows(0);
 	set_mouse_function(0);
 	set_keyboard_function(&key_catcher);
+	terminal_setcolor(og_color); 
+	terminal_clear_screen();
 }
