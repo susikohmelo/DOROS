@@ -14,7 +14,7 @@
 
 # define MOUSE_SENS 0.1
 # define MOUSE_X_SENS MOUSE_SENS
-# define MOUSE_Y_SENS MOUSE_SENS / 2 // To account for chars not being square
+# define MOUSE_Y_SENS MOUSE_SENS / 3.2 // To account for chars not being square
 
 static uint8_t g_cursor_bits[16] =
 {
