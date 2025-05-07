@@ -113,7 +113,7 @@ static void store_new_prev_character()
 	uint16_t old_char;
 
 	// TOPL
-	old_char = g_prev_char2;
+	old_char = g_prev_char1;
 	g_prev_char1 = ((uint16_t*) VGA_DEFAULT_LOCATION) \
 	[VGA_DEFAULT_WIDTH * g_prev_pos[1] + g_prev_pos[0]];
 	// Keep old char if new one is a cursor byte
@@ -139,7 +139,7 @@ static void store_new_prev_character()
 		g_prev_char3 = old_char;
 
 	// BOTTOMR
-	old_char = g_prev_char3;
+	old_char = g_prev_char4;
 	if ((uint8_t) g_mouse_y < VGA_DEFAULT_HEIGHT - 1
 	&& (uint8_t) g_mouse_x < VGA_DEFAULT_WIDTH - 1)
 		g_prev_char4 = ((uint16_t*) VGA_DEFAULT_LOCATION) \
