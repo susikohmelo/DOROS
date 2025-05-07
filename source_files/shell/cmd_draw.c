@@ -224,8 +224,8 @@ static void flood_fill(uint8_t x, uint8_t y, uint8_t t_clr, bool original)
 	if (y == 0 || x >= VGA_DEFAULT_WIDTH || y >= VGA_DEFAULT_HEIGHT)
 		return ;
 
-	uint8_t cur_clr = (((uint16_t*) VGA_DEFAULT_LOCATION)[VGA_DEFAULT_WIDTH
-		* y + x]) >> 8;
+	uint8_t cur_clr = (((uint16_t*) VGA_DEFAULT_LOCATION) \
+			[VGA_DEFAULT_WIDTH * y + x]) >> 8;
 	if (!original && (cur_clr == g_draw_color
 			|| (cur_clr != t_clr && cur_clr != g_draw_color)))
 		return ;
@@ -276,8 +276,7 @@ static void cmd_draw(uint8_t *args)
 		__asm__ __volatile__ ("CLI");
 		if (g_r_down && (uint8_t)g_mouse_y != 0)
 		{
-			flood_fill(g_mouse_x, g_mouse_y, g_prev_char1 >> 8, 1);
-			store_new_prev_character(0);
+			flood_fill(g_mouse_x, g_mouse_y, (g_prev_char1 >> 8), 1);
 		}
 		if (g_l_down)
 		{
