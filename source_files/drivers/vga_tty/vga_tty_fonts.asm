@@ -1,6 +1,5 @@
 global get_fonts
 global set_fonts
-
 bits 32
 
 ; in: ptr to buffer with 4096 bytes
@@ -26,7 +25,7 @@ get_fonts:
 
 	; copy charmap
 	mov		esi, 0xa0000
-	mov		ecx, 128
+	mov		ecx, 256
 
 load_loop:
 	; copy 16 bytes to bitmap
@@ -34,6 +33,7 @@ load_loop:
 	movsd
 	movsd
 	movsd
+
 	; skip 16 bytes
 	add		esi, 16
 	loop		load_loop
@@ -49,6 +49,8 @@ load_loop:
 	mov		ax, 0xE06
 	out		dx, ax
 	ret
+
+
 
 
 ; in: ptr to buffer with 4096 bytes
@@ -74,7 +76,7 @@ set_fonts:
 
 	; copy charmap
 	mov		edi, 0xa0000
-	mov		ecx, 128
+	mov		ecx, 256
 
 load_loop2:
 	; copy 16 bytes to bitmap
@@ -82,8 +84,9 @@ load_loop2:
 	movsd
 	movsd
 	movsd
+
 	; skip 16 bytes
-	add		esi, 16
+	add		edi, 16
 	loop		load_loop2
 
 	; restore VGA state to normal operation
