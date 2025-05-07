@@ -44,6 +44,7 @@ static uint16_t	g_prev_char4;
 static uint8_t	g_prev_pos[2];
 
 static uint8_t	g_draw_color;
+static uint8_t	g_draw_key;
 static float	g_mouse_x;
 static float	g_mouse_y;
 static bool	g_l_down;
@@ -52,13 +53,16 @@ static uint8_t *g_fonts;
 
 static bool	g_exit_draw = false;
 
-void exit_draw(uint8_t key)
+void draw_key_catcher(uint8_t key)
 {
 	if (key > 127)
 		return ;
 	int8_t translated_key = keycode_map[key];
 	if (translated_key == KEY_ESCAPE)
 		g_exit_draw = true;
+	else if (translated_key < 0)
+		return ;
+	g_draw_key = (uint8_t)translated_key;
 }
 
 void mouse_catcher(int16_t x, int16_t y, bool l, bool r)
@@ -93,49 +97,62 @@ static inline void write_color_banner()
 
 	terminal_setcolor(og_color);
 	terminal_putchar('\n'); terminal_putchar('\n');
-	terminal_putstring("Press ESC to quit. Click above colors to choose one\n");
-	terminal_putstring("Left click to draw - Right click to flood fill\n");
+	terminal_putstring("Press ESC to quit.\n");
+	terminal_putstring("Left click to draw - Right click to flood fill\n\n");
+	terminal_putstring("Left  click top row to choose main color\n");
+	terminal_putstring("Right click top row to choose character color\n");
+	terminal_putstring("Press a key to select the character to draw with.\n\n");
 	terminal_putstring("You may draw over this message.");
 }
 
-static void store_new_prev_character(bool wipe_chardata)
+static void store_new_prev_character()
 {
 	g_prev_pos[0] = (uint8_t) g_mouse_x;
 	g_prev_pos[1] = (uint8_t) g_mouse_y;
 
+	uint16_t old_char;
+
 	// TOPL
+	old_char = g_prev_char2;
 	g_prev_char1 = ((uint16_t*) VGA_DEFAULT_LOCATION) \
 	[VGA_DEFAULT_WIDTH * g_prev_pos[1] + g_prev_pos[0]];
+	// Keep old char if new one is a cursor byte
+	if ((uint8_t)g_prev_char1 == CUR_B1)
+		g_prev_char1 = old_char;
 
 	// TOPR
+	old_char = g_prev_char2;
 	if ((uint8_t) g_mouse_x < VGA_DEFAULT_WIDTH - 1)
 		g_prev_char2 = ((uint16_t*) VGA_DEFAULT_LOCATION) \
 		[VGA_DEFAULT_WIDTH * (g_prev_pos[1] + 0) + (g_prev_pos[0] + 1)];
+	// Keep old char if new one is a cursor byte
+	if ((uint8_t)g_prev_char2 == CUR_B2)
+		g_prev_char2 = old_char;
 
 	// BOTTOML
+	old_char = g_prev_char3;
 	if ((uint8_t) g_mouse_y < VGA_DEFAULT_HEIGHT - 1)
 		g_prev_char3 = ((uint16_t*) VGA_DEFAULT_LOCATION) \
 		[VGA_DEFAULT_WIDTH * (g_prev_pos[1] + 1) + (g_prev_pos[0] + 0)];
+	// Keep old char if new one is a cursor byte
+	if ((uint8_t)g_prev_char3 == CUR_B3)
+		g_prev_char3 = old_char;
 
 	// BOTTOMR
+	old_char = g_prev_char3;
 	if ((uint8_t) g_mouse_y < VGA_DEFAULT_HEIGHT - 1
 	&& (uint8_t) g_mouse_x < VGA_DEFAULT_WIDTH - 1)
 		g_prev_char4 = ((uint16_t*) VGA_DEFAULT_LOCATION) \
 		[VGA_DEFAULT_WIDTH * (g_prev_pos[1] + 1) + (g_prev_pos[0] + 1)];
-	
-	if (wipe_chardata)
-	{
-		g_prev_char1 = g_prev_char1 & 0xFF00;
-		g_prev_char2 = g_prev_char2 & 0xFF00;
-		g_prev_char3 = g_prev_char3 & 0xFF00;
-		g_prev_char4 = g_prev_char4 & 0xFF00;
-	}
+	// Keep old char if new one is a cursor byte
+	if ((uint8_t)g_prev_char4 == CUR_B4)
+		g_prev_char4 = old_char;
 }
 
-static void draw_image(uint8_t *img, int8_t offx, int8_t offy)
+static void draw_image(uint8_t *img, int8_t offx, int8_t offy, uint8_t c)
 {
-	for (int8_t y = 0; y < 16; ++y) // Init with 0s
-		img[y] = 0;
+	for (int8_t y = 0; y < 16; ++y) // Init with our character
+		img[y] = (g_fonts + c * 16)[y];
 
 	// Pastes the bitmap based on the coordinate.
 	// The if else tree is just because the bitshift can't take negatives
@@ -143,20 +160,20 @@ static void draw_image(uint8_t *img, int8_t offx, int8_t offy)
 	{
 		if (offx >= 0)
 			for (int8_t y = 0; y < 16 - offy; ++y)
-				img[y + offy] |= (g_cursor_b[y] >> offx);
+				img[y + offy] ^= (g_cursor_b[y] >> offx);
 		else
 			for (int8_t y = 0; y < 16 - offy; ++y)
-				img[y + offy] |= (g_cursor_b[y] << (offx * -1));
+				img[y + offy] ^= (g_cursor_b[y] << (offx * -1));
 	}
 	else
 	{
 		offy *= -1;
 		if (offx >= 0)
 			for (int8_t y = 0; y < 16 - offy; ++y)
-				img[y] |= (g_cursor_b[y + offy] >> offx);
+				img[y] ^= (g_cursor_b[y + offy] >> offx);
 		else
 			for (int8_t y = 0; y < 16 - offy; ++y)
-				img[y] |= (g_cursor_b[y + offy] << (offx * -1));
+				img[y] ^= (g_cursor_b[y + offy] << (offx * -1));
 	}
 }
 
@@ -167,16 +184,16 @@ static inline void draw_cursor_ascii()
 	int8_t sub_y = ((float)g_mouse_y - (int8_t)g_mouse_y) * 16.0;
 	uint8_t img[16]; 
 
-	draw_image(img, sub_x, sub_y);
+	draw_image(img, sub_x, sub_y, g_prev_char1);
 	k_memcpy(img, g_fonts + CUR_B1 * 16, 16); 
 
-	draw_image(img, sub_x - 8, sub_y);
+	draw_image(img, sub_x - 8, sub_y, g_prev_char2);
 	k_memcpy(img, g_fonts + CUR_B2 * 16, 16); 
 
-	draw_image(img, sub_x, sub_y - 16);
+	draw_image(img, sub_x, sub_y - 16, g_prev_char3);
 	k_memcpy(img, g_fonts + CUR_B3 * 16, 16); 
 
-	draw_image(img, sub_x - 8, sub_y - 16);
+	draw_image(img, sub_x - 8, sub_y - 16, g_prev_char4);
 	k_memcpy(img, g_fonts + CUR_B4 * 16, 16); 
 												 
 	set_fonts(g_fonts);
@@ -193,7 +210,7 @@ static inline void show_mouse_on_screen()
 	terminal_putblock_at(g_prev_char4, g_prev_char4 >> 8, \
 		g_prev_pos[0] + 1, g_prev_pos[1] + 1);
 
-	store_new_prev_character(0);
+	store_new_prev_character();
 
 	draw_cursor_ascii();
 
@@ -237,10 +254,20 @@ static void flood_fill(uint8_t x, uint8_t y, uint8_t t_clr, bool original)
 	flood_fill(x, y - 1, t_clr, 0);
 }
 
-static inline void choose_color()
+static inline void choose_color(bool type)
 {
-	uint8_t t_clr = (((uint8_t) g_mouse_x) / 5);
-	g_draw_color = ((t_clr << 4) & 0xF0) | (t_clr & 0x0F);
+	if (type == 0)
+	{
+		uint8_t t_clr = (((uint8_t) g_mouse_x) / 5);
+		g_draw_color &= 0x0F; // Reset BG color
+		g_draw_color |= ((t_clr << 4) & 0xF0);
+	}
+	else
+	{
+		uint8_t t_clr = (((uint8_t) g_mouse_x) / 5);
+		g_draw_color &= 0xF0; // Reset FG color
+		g_draw_color |= (t_clr & 0x0F);
+	}
 }
 
 static inline void print_block_bits()
@@ -262,14 +289,18 @@ static inline void print_block_bits()
 static inline void init_globals()
 {
 	g_exit_draw = 0;
-	g_prev_char1 = 0;
-	g_draw_color = 0xFF;
-	g_mouse_x = 0;
-	g_mouse_y = 0;
-	g_l_down = false;
-	g_r_down = false;
-	g_prev_pos[0] = 0;
-	g_prev_pos[1] = 0;
+	g_prev_char1	= 0;
+	g_prev_char2	= 0;
+	g_prev_char3	= 0;
+	g_prev_char4	= 0;
+	g_draw_color	= 0xFF;
+	g_draw_key	= 0;
+	g_mouse_x	= 0;
+	g_mouse_y	= 0;
+	g_l_down	= false;
+	g_r_down	= false;
+	g_prev_pos[0]	= 0;
+	g_prev_pos[1]	= 0;
 	g_fonts = g_font_bitmap;
 }
 
@@ -278,7 +309,7 @@ static void cmd_draw(uint8_t *args)
 	__asm__ __volatile__ ("cli");
 
 	uint8_t og_color = get_color();
-	set_keyboard_function(&exit_draw);
+	set_keyboard_function(&draw_key_catcher);
 	set_mouse_function(&mouse_catcher);
 	set_ignore_rows(0);
 	disable_cursor();
@@ -292,25 +323,27 @@ static void cmd_draw(uint8_t *args)
 	{
 		__asm__ __volatile__ ("HLT");
 		__asm__ __volatile__ ("CLI");
+
 		if (g_r_down && (uint8_t)g_mouse_y != 0)
-		{
 			flood_fill(g_mouse_x, g_mouse_y, (g_prev_char1 >> 8), 1);
-		}
+		else if (g_r_down && (uint8_t)g_mouse_y == 0)
+			choose_color(1);
 		if (g_l_down)
 		{
 			if ((uint8_t) g_mouse_y == 0)
 			{
-				choose_color();
+				choose_color(0);
 				goto END;
 			}
 			show_mouse_on_screen();
-			terminal_putblock_at(0xC0, g_draw_color,
+			terminal_putblock_at(g_draw_key, g_draw_color,
 				(uint8_t) g_mouse_x, (uint8_t) g_mouse_y);
-			store_new_prev_character(1);
+			store_new_prev_character();
 		}
 		END:
 			show_mouse_on_screen();
 			print_block_bits();
+
 			__asm__ __volatile__ ("STI");
 	}
 
@@ -318,7 +351,7 @@ static void cmd_draw(uint8_t *args)
 	enable_cursor();
 	set_ignore_rows(0);
 	set_mouse_function(0);
-	set_keyboard_function(&key_catcher);
+	set_keyboard_function(&key_catcher); // shell key catcher
 	terminal_setcolor(og_color); 
 	terminal_clear_screen();
 }
