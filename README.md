@@ -19,6 +19,7 @@ Most of the source_file subfolders have READMEs with a summary of the folder's c
 - IDT & everything needed for interrupts (such as PIC configs & IVT)
 - PS/2 keyboard driver
 - PS/2 mouse driver
+- TUI mouse cursor (font bitmask magic to give an illusion of a real GUI mouse)
 - Heap allocation (malloc/free like functionality)
 - Basic TTY functionality (VGA text mode terminal)
 - Basic shell & commands
