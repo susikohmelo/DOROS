@@ -199,7 +199,8 @@ static inline void draw_cursor_ascii()
 	set_fonts(g_fonts);
 }
 
-static inline void show_mouse_on_screen()
+// Yoink the mouse characters off screen
+static void lift_mouse_off()
 {
 	terminal_putblock_at(g_prev_char1, g_prev_char1 >> 8, \
 		g_prev_pos[0], g_prev_pos[1]);
@@ -211,9 +212,11 @@ static inline void show_mouse_on_screen()
 		g_prev_pos[0] + 1, g_prev_pos[1] + 1);
 
 	store_new_prev_character();
+}
 
-	draw_cursor_ascii();
-
+// Slam the mouse characters on screen
+static void put_mouse_down()
+{
 	// Put new cursor
 	uint8_t new_c = g_prev_char1 >> 8; // Color of background char
 	new_c ^= 0x0F;
@@ -234,6 +237,13 @@ static inline void show_mouse_on_screen()
 	new_c ^= 0x0F;
 	terminal_putblock_at(CUR_B4, new_c,
 			(uint8_t) g_mouse_x + 1, (uint8_t) g_mouse_y + 1);
+}
+
+static inline void update_mouse_on_screen()
+{
+	lift_mouse_off();	// Yank the mouse characters off the screen
+	draw_cursor_ascii();	// Update cursor bits on the fonts
+	put_mouse_down();	// Put the mouse characters back on screen
 }
 
 static void flood_fill(uint8_t x, uint8_t y, uint8_t t_clr, bool original)
@@ -325,7 +335,13 @@ static void cmd_draw(uint8_t *args)
 		__asm__ __volatile__ ("CLI");
 
 		if (g_r_down && (uint8_t)g_mouse_y != 0)
+		{
+			lift_mouse_off();
 			flood_fill(g_mouse_x, g_mouse_y, (g_prev_char1 >> 8), 1);
+			store_new_prev_character();
+			draw_cursor_ascii();
+			put_mouse_down();
+		}
 		else if (g_r_down && (uint8_t)g_mouse_y == 0)
 			choose_color(1);
 		if (g_l_down)
@@ -335,13 +351,13 @@ static void cmd_draw(uint8_t *args)
 				choose_color(0);
 				goto END;
 			}
-			show_mouse_on_screen();
+			update_mouse_on_screen();
 			terminal_putblock_at(g_draw_key, g_draw_color,
 				(uint8_t) g_mouse_x, (uint8_t) g_mouse_y);
 			store_new_prev_character();
 		}
 		END:
-			show_mouse_on_screen();
+			update_mouse_on_screen();
 			print_block_bits();
 
 			__asm__ __volatile__ ("STI");
