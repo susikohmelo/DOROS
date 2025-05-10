@@ -6,11 +6,11 @@ A simple x86 32-bit OS written from scratch in Assembly and C.
 Most of the source_file subfolders have READMEs with a summary of the folder's contents.<br>
 
 <sub> DOROS booting & running on real hardware.</sub><br>
-<img src="https://github.com/susikohmelo/DOROS/blob/main/readme_files/doros_boot.gif" height="350"/>
-<img src="https://github.com/susikohmelo/DOROS/blob/main/readme_files/doros_mouse.gif" height="350"/>
+<img src="https://github.com/susikohmelo/DOROS/blob/main/readme_files/doros_boot.gif" width="60%"/>
+<img src="https://github.com/susikohmelo/DOROS/blob/main/readme_files/doros_mouse.gif" width="33%"/>
 
 <sub> Example of basic artwork that can be made inside the paint program.</sub><br>
-<img src="https://github.com/susikohmelo/DOROS/blob/main/readme_files/image.webp" height="200"/>
+<img src="https://github.com/susikohmelo/DOROS/blob/main/readme_files/image.webp" width="60%"/>
 
 
 ## What's currently implemented?
