@@ -35,10 +35,10 @@ There is a FAT12 floppy image called `floppy_DOROS.img` inside the `precompiled_
 
 ### Option 2: Using Docker
 Running `make docker` will build & run a docker image, which will compile the code for you.<br>
-Why docker? Compiling systems is pretty hard as you're building code for a different computer. It requires special tools like cross compilers which are a bit of a pain to install and will likely be never used for anything else. Docker is an elegant solution to this, but be warned - it takes a WHILE to build the environment!
+The cross compilers are a bit of a pain to install and will likely be never used for anything else. Docker is a lot easier solution to this, but be warned - it takes a WHILE to build the environment!
 
 ## How to run?
-For linux/unix, install `qemu-system` and run the OS with `make run`.<br>
+For Linux, install `qemu-system` and run the OS with `make run`.<br>
 For windows, install qemu via other means and run the emulator with `precompiled_OS/floppy_DOROS.img` as the input argument.
 
 Alternatively you can try it on real hardware! Burn the `precompiled_OS/floppy_DOROS.img` onto a USB stick and
