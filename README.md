@@ -14,6 +14,7 @@ Most of the source_file subfolders have READMEs with a summary of the folder's c
 
 
 ## What's currently implemented?
+Everything currently runs within kernel space, so it's quite a simple system indeed.
 ### In 16-bit real mode
 - FAT12 file system (only accessible in 16bit mode)
 - Bootloader with an assembly based driver to find and load any file from the file system
@@ -28,7 +29,6 @@ Most of the source_file subfolders have READMEs with a summary of the folder's c
 - Heap allocation (malloc/free like functionality)
 - Basic TTY functionality (VGA text mode terminal)
 - Basic shell & commands
-Everything currently runs within kernel space, so it's quite a simple system indeed.
 
 ## How to compile?
 
