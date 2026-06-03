@@ -1,6 +1,6 @@
 # Heap allocation documentation ( kmalloc / kfree )
 
-Very simplistic implementation of malloc like heap allocation.<br>
+Extremely minimal implementation of malloc like heap allocation.<br>
 Instead of using arenas, this has one bitmap that represents the entire heap.
 
 The bitmap itself is located right before the heap.
