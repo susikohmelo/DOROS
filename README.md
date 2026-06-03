@@ -18,6 +18,7 @@ Most of the source_file subfolders have READMEs with a summary of the folder's c
 - FAT12 file system (only accessible in 16bit mode)
 - Bootloader with an assembly based driver to find and load any file from the file system
 - GDT following a small flat memory model (ie. up to 4gb of unsegmented kernel space ram)
+- Setting up everything necessary to run C
 
 ### In 32-bit protected mode
 - IDT & everything needed for interrupts (such as PIC configs)
@@ -27,6 +28,7 @@ Most of the source_file subfolders have READMEs with a summary of the folder's c
 - Heap allocation (malloc/free like functionality)
 - Basic TTY functionality (VGA text mode terminal)
 - Basic shell & commands
+Everything currently runs within kernel space, so it's quite a simple system indeed.
 
 ## How to compile?
 
